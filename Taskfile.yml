@@ -1,0 +1,65 @@
+version: "3"
+
+vars:
+  SIDECAR_DIR: ../sc-overlay
+
+tasks:
+  default:
+    desc: List available tasks
+    cmds:
+      - task --list
+
+  install:
+    desc: Install JS dependencies
+    cmds:
+      - npm install
+
+  start:
+    desc: Start the Expo dev server
+    cmds:
+      - npx expo start
+
+  ios:
+    desc: Start the Expo dev server and open the iOS simulator
+    cmds:
+      - npx expo start --ios
+
+  android:
+    desc: Start the Expo dev server and open an Android emulator
+    cmds:
+      - npx expo start --android
+
+  web:
+    desc: Start the Expo dev server for web
+    cmds:
+      - npx expo start --web
+
+  lint:
+    desc: Check formatting/lint with Biome (no writes)
+    cmds:
+      - npm run lint
+
+  lint:fix:
+    desc: Format and fix lint issues with Biome
+    cmds:
+      - npm run lint:fix
+
+  typecheck:
+    desc: Type-check the project with tsc (no emit)
+    cmds:
+      - npm run typecheck
+
+  check:
+    desc: Run lint + typecheck (what CI/pre-push should run)
+    cmds:
+      - task: lint
+      - task: typecheck
+
+  sidecar:
+    desc: Boot the sc-overlay sidecar on macOS for local dev (no game.log; mission-search/preview/blueprint-detail + SSE all work)
+    dir: "{{.SIDECAR_DIR}}"
+    env:
+      SC_BP_NO_WINDOW: "1"
+      PORT: "8899"
+    cmds:
+      - npx tsx src/overlay-server.ts

@@ -166,10 +166,26 @@ community: { payout: … | null, facts: { difficulty, difficultyAnswers, … } |
 (`src/overlay-server.ts:599`). So the phone gets it through the sidecar and needs no internet
 access of its own.
 
-🔑 **`null` is a normal, everyday value here, not an error.** It's null when the sidecar is
-offline, when subliminal.gg is down, on a cache miss, and for any contract nobody has reported.
-It is `null` in every fixture in this repo for exactly that reason. Never show an error or a
-spinner for a null `community` — just omit what it would have told you.
+🔑 **There are three states here, not two, and the outer null is not the same as the inner ones.**
+Measured against a live sidecar:
+
+| Response | Means |
+|---|---|
+| `community: null` | **no cache entry yet.** The sidecar kicked off the fetch when you asked and answered without waiting. Also what you get when it's offline or subliminal.gg is down. |
+| `community: {payout: null, facts: null}` | fetch **succeeded**; nobody has reported this contract |
+| `community: {payout: {…}, facts: {…}}` | real player-reported data |
+
+So `payout` and `facts` are independently nullable *inside* a non-null `community`. Null-checking
+only the outer object is a bug — `community` being present tells you nothing about either member.
+
+⚠️ **It pops in a beat later.** The first request for a contract returns `community: null` and
+starts the fetch; a request a second or two later returns the populated object. Verified: ask twice
+for the same title and you get `null` then `{payout:null,facts:null}`.
+
+That transition is normal and must not look like a load or a correction. Never show an error, a
+spinner or a placeholder for a null `community` at any level — just omit what it would have said,
+and let it appear if it appears. `fixtures/mission-preview.json` is the cold state and
+`fixtures/mission-preview-warm.json` the warm one, so both paths can be built against.
 
 `community.payout` is what drives the `reported` provenance label in the honesty rules below.
 
