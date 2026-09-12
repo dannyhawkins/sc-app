@@ -1,12 +1,14 @@
-Copyright © 2026 SubliminalsTV. All rights reserved.
+Copyright © 2026 Danny Hawkins. All rights reserved.
 
 sc-app is **source-available**, not open source. It is licensed under the
 **Functional Source License, Version 1.1, MIT Future License (FSL-1.1-MIT)**,
-reproduced verbatim below. In that license, "we" and "us" mean SubliminalsTV.
+reproduced verbatim below. In that license, "we" and "us" mean Danny Hawkins.
 
-This matches [SC Overlay](https://github.com/SubliminalsTV-Projects/sc-overlay),
-whose local API this app is a client for. Two projects that ship together should
-not carry terms that disagree.
+sc-app is an independent work. It is a client for the local HTTP API exposed by
+[SC Overlay](https://github.com/SubliminalsTV-Projects/sc-overlay), which is a
+separate project by SubliminalsTV under its own copyright and its own copy of
+this licence. Nothing here claims any right in that project, and none of its
+code is included.
 
 ## In plain English (summary only — the terms below are what govern)
 
@@ -25,8 +27,8 @@ You **may not**:
 - ship it inside a commercial product or service that substitutes for sc-app
   or SC Overlay, or offers substantially the same functionality — the "rename
   it and sell it" case;
-- use the SubliminalsTV name, the SC Overlay or sc-app names, or the project's
-  logos to brand your build. No license here grants trademark rights (see
+- use the sc-app name to brand your build, or the SubliminalsTV and SC Overlay
+  names and logos, which belong to that project and are not licensed here. No license here grants trademark rights (see
   Trademarks), so a fork must carry its own name.
 
 Two things worth knowing: every version becomes **MIT** two years after its
@@ -42,7 +44,7 @@ FSL-1.1-MIT
 
 ## Notice
 
-Copyright 2026 SubliminalsTV
+Copyright 2026 Danny Hawkins
 
 ## Terms and Conditions
 

@@ -78,15 +78,22 @@ task            # list what's available
 
 ## Licence
 
-Source-available under [FSL-1.1-MIT](LICENSE.md), matching SC Overlay — read it, modify it, run
-your own build, publish a free fork or port. What you can't do is sell it or ship it inside
-something that substitutes for SC Overlay. Each version converts to MIT two years after release.
-
-The names and logos aren't licensed, so a fork needs its own branding.
+Source-available under [FSL-1.1-MIT](LICENSE.md) — read it, modify it, run your own build,
+publish a free fork or port. What you can't do is sell it. Each version converts to MIT two years
+after release.
 
 ## Relationship to SC Overlay
 
-SC Overlay is by SubliminalsTV and is source-available under the same licence. This is a separate
-client for its local API by the same author. Star Citizen®, Roberts Space Industries® and Cloud
-Imperium® are registered trademarks of Cloud Imperium Rights LLC; this is an unofficial fan
-project and is not affiliated with or endorsed by CIG.
+**This is an independent project and not affiliated with SC Overlay.**
+
+[SC Overlay](https://github.com/SubliminalsTV-Projects/sc-overlay) is by SubliminalsTV. It is
+source-available under its own copy of FSL-1.1-MIT, whose plain-English summary expressly permits
+publishing a free port to a platform the project does not support — which is what this is. None of
+its code is included here; this app only speaks to the local HTTP API its sidecar exposes.
+
+The SubliminalsTV and SC Overlay names and logos are **not** licensed by that project and are not
+claimed here.
+
+Star Citizen®, Roberts Space Industries® and Cloud Imperium® are registered trademarks of Cloud
+Imperium Rights LLC; this is an unofficial fan project and is not affiliated with or endorsed by
+CIG.
