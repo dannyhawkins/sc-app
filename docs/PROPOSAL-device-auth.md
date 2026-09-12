@@ -2,9 +2,16 @@
 
 **Status:** draft, not implemented. Tracked as [#12](https://github.com/dannyhawkins/sc-app/issues/12).
 
-This is a change to **`sc-overlay`**, not to this app. It's written here because this app is the
-thing that needs it, and because it can't be landed from the `danhawkins` account —
-`SubliminalsTV-Projects/sc-overlay` is read-only from here.
+This describes a change to **`sc-overlay`**, which is a different project by a different author
+(SubliminalsTV). It is written here because this app is the thing that needs it.
+
+**It is a proposal, not a plan.** Nobody here can or should land it: whether the sidecar grows
+device auth at all is entirely its maintainer's call, and this document exists to make that
+conversation concrete rather than to pre-empt it. It is written to be *rejectable* — every
+decision below is argued from that project's own source and its own prior incident, so the
+reasoning can be checked rather than taken on trust.
+
+If the answer is no, this app stays read-only, which is a working product and not a failure state.
 
 ## What it unlocks
 

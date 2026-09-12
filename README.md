@@ -60,17 +60,27 @@ Windows game PC                            phone / tablet
 
 ## Development
 
-You need the sidecar running. It works on macOS and Linux, so you don't need a Windows box to
-build against it:
+**You can build the whole app with no server at all** — there's a fixture-backed mock mode, fed
+from real captured responses in [`fixtures/`](fixtures/).
+
+For live data you need SC Overlay's sidecar, which is in
+[its own repository](https://github.com/SubliminalsTV-Projects/sc-overlay) (source-available,
+separate project). Clone it alongside this one and run the server without its Electron shell — it
+is plain Node, so macOS and Linux work and no Windows box is needed:
 
 ```bash
-cd ../sc-overlay
+cd ../sc-overlay && npm install
 SC_BP_NO_WINDOW=1 PORT=8899 npx tsx src/overlay-server.ts
 ```
 
-Without a real `game.log` the live tracker state stays empty, but the bundled dataset endpoints
-serve real content — ~1,999 contracts and their blueprint pools — which is enough to build
-against. There's also a fixture-backed mock mode for working with no server at all.
+Port 8899 rather than the default 8778, so a dev server can't collide with a real SC Overlay on
+the same machine.
+
+⚠️ **Without a real `game.log` the tracker state is permanently empty**, because a populated
+tracker needs a live Star Citizen session on Windows. The bundled dataset endpoints still serve
+real content — ~1,999 contracts and their blueprint pools, which is plenty to build against — but
+anything derived from actual play (standings, recent drops, the completion card) can only be seen
+with a capture from a real session.
 
 ```bash
 task            # list what's available
