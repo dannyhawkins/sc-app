@@ -50,11 +50,11 @@ export function BlueprintRow({
 						<Text style={[type.num, styles.chance]}>{Math.round(chance * 100)}%</Text>
 					) : null}
 				</View>
-				{suffix ? <Text style={[type.caption, styles.suffix]}>· {suffix}</Text> : null}
+				<Text style={[type.caption, styles.sub]} numberOfLines={1}>
+					{sub}
+					{suffix ? <Text style={styles.suffix}> · {suffix}</Text> : null}
+				</Text>
 			</View>
-			<Text style={[type.caption, styles.sub]} numberOfLines={1}>
-				{sub}
-			</Text>
 			<View style={styles.trailing}>
 				{hasDetail ? <Text style={styles.chevron}>›</Text> : null}
 			</View>
@@ -107,8 +107,13 @@ const styles = StyleSheet.create({
 		color: colors.textFaint,
 	},
 	sub: {
+		// 🔑 SECOND LINE, not a right-hand column (#27). As a sibling column this took its natural
+		// width first and left `middle` (flex:1) the remainder, so the NAME was the thing that
+		// clipped — "Pulse Laser Pistol Batte…" sitting next to a full-width "Magazines". Backwards:
+		// the name is what the player is scanning for, and `sub` is largely implied by the
+		// WEAPONS/AMMO/ARMOR header directly above the row anyway. Note flexShrink could not fix
+		// this — the row never overflowed, so nothing ever shrank.
 		color: colors.textDim,
-		flexShrink: 0,
 	},
 	trailing: {
 		width: 44,
