@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { AmbiguousBanner } from "@/components/tracker/AmbiguousBanner";
 import { CommunityFacts } from "@/components/tracker/CommunityFacts";
 import { FactsRow } from "@/components/tracker/FactsRow";
@@ -33,9 +33,28 @@ export function TrackedView({
 	const matchedStanding = frame.repBar
 		? frame.standings.find((s) => s.faction === frame.repBar?.faction)
 		: undefined;
+	// docs/DESIGN.md §2: at >= 700pt the Tracker becomes two columns — the mission and its pool on
+	// the left, the context that hangs off it on the right. Same components either way; the only
+	// difference is which container they sit in, so there is no tablet-specific rendering path to
+	// keep in sync. A phone in landscape crosses this too, which is correct: the constraint is
+	// width, not device class.
+	const { width } = useWindowDimensions();
+	// 🔑 WIDTH IS NOT ENOUGH — the aside must have something in it.
+	//
+	// Splitting on width alone looked right in the spec and wrong on a device: every one of the
+	// aside's blocks is conditional, and on a fresh contract they are ALL empty (no other pools,
+	// nothing unrecognised, no item rewards, no rep bar). The result was a dead 40% column while
+	// the pool squeezed into 60% and started truncating blueprint names again — undoing #27 on
+	// exactly the screens with the most room to spare.
+	const hasAside =
+		frame.otherPools.length > 0 ||
+		frame.unrecognized.names.length > 0 ||
+		frame.itemRewards.length > 0 ||
+		frame.repBar !== null;
+	const twoColumn = width >= 700 && hasAside;
 
-	return (
-		<View style={styles.container}>
+	const main = (
+		<>
 			<View style={styles.headerCluster}>
 				<MissionHeader
 					title={frame.title}
@@ -81,6 +100,11 @@ export function TrackedView({
 					onPressRow={onPressBlueprint}
 				/>
 			))}
+		</>
+	);
+
+	const aside = (
+		<>
 			<OtherPoolsNote otherPools={frame.otherPools} />
 			<UnrecognizedNotice
 				names={frame.unrecognized.names}
@@ -90,12 +114,42 @@ export function TrackedView({
 			{frame.repBar ? (
 				<StandingBlock repBar={frame.repBar} standing={matchedStanding} accent={accent} />
 			) : null}
+		</>
+	);
+
+	if (!twoColumn) {
+		return (
+			<View style={styles.container}>
+				{main}
+				{aside}
+			</View>
+		);
+	}
+
+	return (
+		<View style={styles.columns}>
+			<View style={styles.columnMain}>{main}</View>
+			<View style={styles.columnAside}>{aside}</View>
 		</View>
 	);
 }
 
 const styles = StyleSheet.create({
 	container: {
+		gap: spacing.sectionGap,
+	},
+	columns: {
+		flexDirection: "row",
+		gap: spacing.xl,
+		alignItems: "flex-start",
+	},
+	// 3:2 — the pool is the long list and deserves the width; the aside is short blocks.
+	columnMain: {
+		flex: 3,
+		gap: spacing.sectionGap,
+	},
+	columnAside: {
+		flex: 2,
 		gap: spacing.sectionGap,
 	},
 	headerCluster: {
