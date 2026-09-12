@@ -673,8 +673,11 @@ No component fetches on its own except the two sheets.
 
 **Lookup** — the `StatusBar` (§3: every screen, no exceptions — a stale connection has to be
 visible from this tab too), a search field under it, results under that. The field's placeholder
-is `Contract name`; the sentence `Search any of 1,999 contracts.` is the empty-state body only, so
-the two never say the same thing twice on one screen. `GET /api/mission-search?q=` after 2
+is `Contract name`. The empty-state body says what the screen is *for*, not what a search box is:
+`Look up any contract's blueprint pool — including ones you haven't accepted.` No contract count in
+the copy: the bundled dataset's count changes every patch and there is no endpoint to derive it
+from, and a hardcoded figure nobody would think to update is exactly the kind of number this
+project doesn't ship. `GET /api/mission-search?q=` after 2
 characters, debounced 250ms. `SearchResultRow`: `title` / `giver` dim / `hasPool` → accent dot on
 the left, `variants > 1` → dim `· 8 variants` suffix. Tap → **PreviewSheet** via
 `/api/mission-preview?title=`. The sheet is `MissionHeader` + `PayoutLine` + `FactsRow` +
@@ -682,7 +685,7 @@ the left, `variants > 1` → dim `· 8 variants` suffix. Tap → **PreviewSheet*
 exactly like a tracked one, minus the standing block. `owned`/`total` on the preview are the
 player's real progress against that pool, so the big number is meaningful here too.
 
-States: empty (`Search any of 1,999 contracts.` dim, centred), typing (< 2 chars, nothing),
+States: empty (the body line above, dim, centred), typing (< 2 chars, nothing),
 loading (results dim to 50%, no spinner), no results (`Nothing called "…"`), error → the sheet
 shows the same `UnreachableBanner` copy inline. Lookup works with no game log at all — it is the
 dev-loop screen.

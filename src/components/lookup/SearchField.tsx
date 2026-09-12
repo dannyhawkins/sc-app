@@ -13,7 +13,7 @@ export function SearchField({
 		<TextInput
 			value={value}
 			onChangeText={onChangeText}
-			placeholder="Search any of 1,999 contracts."
+			placeholder="Contract name"
 			placeholderTextColor={colors.textFaint}
 			autoCapitalize="none"
 			autoCorrect={false}
