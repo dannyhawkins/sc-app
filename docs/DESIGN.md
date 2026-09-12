@@ -220,9 +220,15 @@ signal, so each state looks different:
 The transition empty → ready happens the instant the field parses (on every keystroke, no
 debounce), so the button visibly wakes up as the address is typed.
 
-*Verification status (2026-09-12):* the empty state has been seen on device. The ready and
-testing states have not — the simulator setup in use can screenshot but not type or tap. §4 is
-not done until someone has typed an address and watched the button change.
+*Verification status (2026-09-12):* **verified on device** — iPhone 17 Pro Max, iOS 27.0. The
+owner typed an address and the button woke on the keystroke that made it parse: hairline outline
+→ accent fill, accent border, full-contrast label. The failure path was seen too, and behaves as
+specified — the error line is amber rather than red (nothing is broken; the PC simply isn't
+answering), it names the host **with the port** per the display rule, and it asks the two
+questions that actually diagnose it: whether SC Overlay is running, and whether the phone is on
+the same wifi.
+
+Only the `testing` state remains unseen, and against a real host it lasts under the 4s timeout.
 
 Field: one text input, `keyboardType: "numbers-and-punctuation"`, accepts `host`, `host:port`,
 or a pasted `http://host:port/`. Normalises to `http://host:port`. Default port **8778**.
