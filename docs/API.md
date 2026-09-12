@@ -96,9 +96,9 @@ Top-level fields that matter for missions/blueprints:
 | `pools` | array | `[{poolUuid, blueprints:[…]}]` — the reward pool. |
 | `totals` | `{owned,total}` | |
 | `collectedTotal` | number | |
-| `closestPools` | array | Pools nearest completion. The between-contracts screen. |
-| `standings` | array | Reputation per mission giver. |
-| `recentMissions`, `recentBlueprints` | array | |
+| `closestPools` | `ClosestPool[]` | Pools nearest completion. The between-contracts screen. See below. |
+| `standings` | `FactionStanding[]` | Reputation per mission giver. See below. |
+| `recentMissions`, `recentBlueprints` | array | See below. Note `at` is an **ISO string**. |
 | `earnings` | object | `aUECLastHr`, `aUECPace`, `repPace`, … |
 | `completion` | object \| null | The after-action card. |
 | `unrecognized` | `{names,packActive}` | Blueprints the localisation couldn't resolve. Surface it — silence here reads as "app is broken". |
@@ -154,6 +154,69 @@ contract. 1 is easy, 5 is hard."* (`overlay/missions-tracker.js:1195`). Verified
 `src/missions.ts:230` and `:669` for the 1–7 scale.
 
 The fixture value `"diff": 5.8` is `facts.diff`, i.e. 5.8 out of 7.
+
+### The arrays that are always empty in dev
+
+`standings`, `closestPools`, `otherPools`, `recentMissions`, `recentBlueprints`, `justReceived`
+and `completion` need a populated tracker, which needs a real `game.log` — so **every fixture in
+this repo has them empty**, and no amount of poking the dev sidecar will produce one.
+
+Their element types are not guessable, but they *are* knowable: they're declared in
+`sc-overlay/src/missions.ts`. Transcribed here with line references, each one read at source.
+
+```ts
+// missions.ts:126 — standings[]
+FactionStanding {
+  faction: string; scope: string; standing: string;
+  nextName: string | null;          // the named next rank
+  pct: number;                      // 0–100 through the current rank — this is the bar
+  toGo: number | null;              // raw rep remaining
+  contractsToGo: number | null;     // 🔑 prefer this: "about 27 contracts" is a plan
+  nextRewards: string[];
+  estimate: number; curMin: number; nextMin: number | null;   // never displayed
+}
+
+// missions.ts:168 — repBar (the TRACKED contract's bar; standings[] is the idle screen's)
+RepBar {
+  scope: string; faction: string; standing: string;
+  nextName: string | null; nextRank: number | null; nextRewards: string[];
+  estimate: number; curMin: number; nextMin: number | null;
+  max: boolean;
+}
+// ⚠️ RepBar has NO `pct`. Derive it from estimate/curMin/nextMin, or draw no bar.
+
+// missions.ts:69 — closestPools[]
+ClosestPool {
+  poolUuid: string; key: string; title: string; poolName: string;
+  missionTitles: string[]; variants: number;
+  missing: string[];                // what you still need — the point of the card
+  owned: number; total: number; places: string[];
+  payMin: number | null; /* …plus pay/dur/rep/cooldown fields */
+}
+
+// missions.ts:565 / :572 — recentMissions[] / recentBlueprints[]
+RecentMission   { title: string | null; aUEC: number | null; at: string | null }
+RecentBlueprint { name: string; at: string | null; item: string | null;
+                  image: string | null; imageFallback: string | null }
+
+// missions.ts:616 — justReceived is a BlueprintReward plus `at`
+BlueprintReward { name: string; item: string | null;
+                  image: string | null; imageFallback: string | null }
+
+// missions.ts:44 — reputationGained[] / reputationLost[]
+RepEntry { faction: string; scope: string; amount: number }
+```
+
+🔴 **`at` is an ISO 8601 string, not an epoch number.** The sidecar writes these with
+`new Date().toISOString()` (`missions.ts:2058`, `:4994`). Arithmetic like `Date.now() - at` gives
+`NaN` — silently, and only on a populated session, i.e. only on the player's Windows box and
+never in any dev environment we have. Parse at the boundary and guard the `NaN`.
+
+Don't confuse these with the client's own `lastSeenAt`, which genuinely is an epoch number
+because we set it.
+
+`RecentMission.title` is nullable. The overlay falls back to the literal `"Mission"`
+(`overlay/missions-tracker.js:542`) — match that rather than inventing a placeholder.
 
 ### `community` — the player-reported layer
 

@@ -657,3 +657,99 @@ is the flat list; `recipeGroups` is the useful one — render groups, skip the f
 Resolved (answers folded into the sections above): `facts.diff` is 1–7 and distinct from the
 community 1–5 figure (§5.1); `community` is `{payout, facts}`, sidecar-fetched, null by default
 (§3, §6.1); the Connect copy points at Settings → Browser sources & extra monitors (§4).
+
+---
+
+## Appendix A — wire shapes the fixtures don't populate
+
+Every fixture in this repo was captured with no game log, so `standings`, `closestPools`,
+`recentMissions`, `recentBlueprints`, `completion`, `justReceived` and `otherPools` are all empty.
+These are their real shapes, read from `sc-overlay/src/missions.ts` (line numbers as of 0.1.47).
+Build against these, not against guesses.
+
+**`standings[]` — `FactionStanding` (`missions.ts:126`)**
+
+```ts
+{ faction: string;            // giver, dataset spelling
+  scope: string;              // rep scope, e.g. "FactionReputation" — internal, don't display
+  standing: string;           // current rank NAME, "Sr. Contractor"
+  nextName: string | null;    // next rank NAME, null at max
+  estimate: number;           // rep floor — never display as a bare number
+  curMin: number; nextMin: number | null;
+  pct: number;                // 0–100 through the CURRENT rank; 100 at max — this is the bar
+  toGo: number | null;        // rep to next rank, null at max
+  contractsToGo: number | null; // the number to show; null at max or when unscoreable
+  nextRewards: string[] }
+```
+
+So the idle `StandingRow` bar is honest: fill `pct`, left label `standing`, right label
+`nextName`, line under it `~N contracts to <nextName>`. `nextName === null` → `Max rank`, bar
+full.
+
+**`repBar` — `RepBar` (`missions.ts:168`)**, the tracked mission's giver
+
+```ts
+{ scope: string; faction: string; standing: string; estimate: number;
+  curMin: number; nextMin: number | null; nextName: string | null; nextRank: number | null;
+  nextRewards: string[]; max: boolean; offTrack?: boolean; noData: boolean }
+```
+
+No `pct` here — derive `clamp((estimate - curMin) / (nextMin - curMin), 0, 1)`; `max` → full.
+`contractsToGo` comes from the `standings[]` entry whose `faction` matches; absent → fall back to
+`~(nextMin - estimate) rep to go`.
+
+**`closestPools[]` — `ClosestPool` (`missions.ts:69`)**
+
+```ts
+{ poolUuid: string; key: string; title: string;
+  poolName: string;           // "Shubin Interstellar · Ship Mining" — the card title
+  missionTitles: string[];    // shortest first; show [0], count the rest
+  variants: number;
+  missing: string[];          // blueprints still needed, alphabetical — the tie-breaker line
+  owned: number; total: number; places: string[];
+  payMin: number | null; payMax: number | null; payoutEstimated: boolean;   // DO NOT RENDER (§5.2)
+  durMin: number | null; rep: number | null; cooldownMin: number | null;    // DO NOT RENDER
+  giver: string | null; missionType: string | null }
+```
+
+**`otherPools[]`** (on the view, `missions.ts` `TrackedView`)
+
+```ts
+{ places: string[]; total: number; owned: number }[]
+```
+
+**`recentMissions[]` / `recentBlueprints[]` (`missions.ts:565`, `:572`)**
+
+```ts
+{ title: string | null; aUEC: number | null; at: string | null }
+{ name: string; at: string | null; item: string | null; image: string | null; imageFallback: string | null }
+```
+
+**`justReceived`** — `BlueprintReward & { at: string }` (`missions.ts:616`)
+
+```ts
+{ name: string; item: string | null; image: string | null; imageFallback: string | null; at: string }
+```
+
+**`completion`** (`missions.ts:799`)
+
+```ts
+{ title: string | null;
+  aUEC: number | null;                       // logged live → the one place "aUEC" is earned
+  payout: { min: number | null; max: number; currency: string | null } | null;
+  payoutEstimated: boolean;
+  facts: MissionFacts | null;                // `cd` → "can be taken again in N"
+  durationMs: number | null;
+  blueprints: BlueprintReward[];
+  at: string;                                // identity
+  contractKey: string | null; giver: string | null; missionType: string | null; rank: number | null;
+  reputationGained: { faction: string; scope: string; amount: number }[];   // show faction, never scope
+  aUecPerHour: number | null;
+  timesCompleted: number | null;
+  poolProgress: { owned: number; total: number } | null;
+  classification: { combat: unknown | null; activity: unknown | null; source: "generator" | "missionType" | null } }
+```
+
+`RepEntry` (`missions.ts:44`) is `{faction, scope, amount}` everywhere it appears —
+`reputationGained`, `reputationLost`, `completion.reputationGained`. Display `faction`; `scope` is
+the internal ladder name and reads as "FactionReputation +50" if you let it through.
