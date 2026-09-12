@@ -10,7 +10,7 @@ next in this code. Ground truth for the wire format and the connection model is 
 |---|---|
 | `types.ts` | Hand-written wire types (MissionView, MissionPreview, Blueprint, …). Nullability is honest — most fields are `null` in the everyday empty-tracker state, not an edge case. |
 | `http-client.ts` | `SidecarHttpClient` (the 4 read endpoints), `normalizeHostInput()`, `normalizeManufacturer()`. |
-| `sse-client.ts` | Thin wrapper over `react-native-sse`, filters `{kind:"devreload"}` frames before they reach a caller. |
+| `sse-client.ts` | Thin wrapper over `react-native-sse`. Filters **any** frame carrying a `kind` field before it reaches a caller — `{kind:"devreload"}` is the only control frame today, but a mission view never carries `kind`, so the field is the signal and a kind added later still can't reach the renderer. |
 | `connect-test.ts` | One-shot host validator for the Connect screen's testing/ok/refused/not-sidecar/403 states. |
 | `host-store.ts` | AsyncStorage: the current host + a 5-entry recents list. Normalizes on write. |
 | `fixtures.ts` | Bundled `../../../fixtures/*.json` for mock mode. |
