@@ -220,6 +220,10 @@ signal, so each state looks different:
 The transition empty → ready happens the instant the field parses (on every keystroke, no
 debounce), so the button visibly wakes up as the address is typed.
 
+*Verification status (2026-09-12):* the empty state has been seen on device. The ready and
+testing states have not — the simulator setup in use can screenshot but not type or tap. §4 is
+not done until someone has typed an address and watched the button change.
+
 Field: one text input, `keyboardType: "numbers-and-punctuation"`, accepts `host`, `host:port`,
 or a pasted `http://host:port/`. Normalises to `http://host:port`. Default port **8778**.
 
