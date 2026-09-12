@@ -8,6 +8,7 @@ import {
 	saveStoredHost,
 } from "@/lib/sidecar/host-store";
 import { normalizeHostInput, SidecarHttpClient } from "@/lib/sidecar/http-client";
+import { sanitizeMissionView } from "@/lib/sidecar/sanitize";
 import { type SseSubscription, subscribeToMissionEvents } from "@/lib/sidecar/sse-client";
 import type { MissionView } from "@/lib/sidecar/types";
 
@@ -56,7 +57,14 @@ interface ConnectionState {
 	hydrated: boolean;
 
 	hydrate: () => Promise<void>;
-	setMode: (mode: SidecarMode) => void;
+	/**
+	 * `sample` only matters when `mode === "mock"`: "tracked" (default) shows the composed sample
+	 * in fixtures.ts (a real mission-preview.json contract laid over the empty shell — see that
+	 * file's comment), "idle" shows the genuinely-empty missions-empty.json state as captured.
+	 * Keeping the plain empty fixture reachable matters — it's the literal bytes the sidecar sends
+	 * with no game.log, and idle mode deserves to be seen honestly too, not just inferred.
+	 */
+	setMode: (mode: SidecarMode, sample?: "tracked" | "idle") => void;
 	/** Persists the host and (re)connects using it. */
 	setHost: (host: string) => Promise<void>;
 	forgetHost: () => Promise<void>;
@@ -110,7 +118,16 @@ export const useConnectionStore = create<ConnectionState>((set, get) => {
 		consecutiveMisses = 0;
 		unreachableRetryIndex = 0;
 		const now = Date.now();
-		set({ conn: "live", frame: view, lastSeenAt: now, hadFrame: true, probing: false });
+		// Sanitize once, here — both the poll and the SSE path funnel through this, and every
+		// component downstream can then trust `frame`'s unverified-shape fields (see sanitize.ts)
+		// instead of each doing its own partial validation.
+		set({
+			conn: "live",
+			frame: sanitizeMissionView(view),
+			lastSeenAt: now,
+			hadFrame: true,
+			probing: false,
+		});
 		void recordRecentHost(host, now);
 		scheduleNextPoll(host, POLL_INTERVAL_MS);
 	}
@@ -178,7 +195,7 @@ export const useConnectionStore = create<ConnectionState>((set, get) => {
 	}
 
 	return {
-		mode: "mock",
+		mode: "live",
 		host: null,
 		conn: "no-host",
 		lastSeenAt: null,
@@ -193,24 +210,26 @@ export const useConnectionStore = create<ConnectionState>((set, get) => {
 				set({ host: storedHost, mode: "live", hydrated: true });
 				connectToHost(storedHost);
 			} else {
-				set({
-					mode: "mock",
-					conn: "live",
-					frame: fixtures.missionsEmpty,
-					hadFrame: true,
-					hydrated: true,
-				});
+				// No host saved: stay on "no-host" and let Connect own the screen — the sample-data
+				// mode below is an explicit opt-in from there, never the silent default.
+				set({ hydrated: true });
 			}
 		},
 
-		setMode: (mode) => {
+		setMode: (mode, sample = "tracked") => {
 			teardownTransport();
 			if (mode === "mock") {
 				set({
 					mode,
 					host: null,
 					conn: "live",
-					frame: fixtures.missionsEmpty,
+					// Default to the TRACKED sample, not the empty one — mock mode exists so someone
+					// with no Windows box can see the screen the app is actually for. `sample: "idle"`
+					// keeps the genuinely-empty fixture reachable too. See fixtures.ts for what the
+					// tracked one composes and what it deliberately refuses to invent.
+					frame: sanitizeMissionView(
+						sample === "idle" ? fixtures.missionsEmpty : fixtures.missionsTracked,
+					),
 					hadFrame: true,
 					lastSeenAt: null,
 					probing: false,
@@ -237,10 +256,10 @@ export const useConnectionStore = create<ConnectionState>((set, get) => {
 			teardownTransport();
 			set({
 				host: null,
-				mode: "mock",
-				conn: "live",
-				frame: fixtures.missionsEmpty,
-				hadFrame: true,
+				mode: "live",
+				conn: "no-host",
+				frame: null,
+				hadFrame: false,
 				lastSeenAt: null,
 				probing: false,
 			});

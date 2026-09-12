@@ -9,9 +9,14 @@
  *  - Every field is typed exactly as observed. Fields that are `null` in every sample we have
  *    stay nullable rather than being narrowed to "probably a string" — the empty state (no game
  *    log, nothing tracked) is the *common* case for this app, not an edge case.
- *  - Nothing here is invented. A field with no populated sample (e.g. `standings`, `missions`)
- *    is typed as `unknown[]` rather than guessed — guessing a wrong shape is worse than an
- *    honest `unknown`.
+ *  - Nothing here is invented. `standings`, `closestPools`, `recentMissions`/`recentBlueprints`
+ *    and `justReceived` never appear populated in any fixture (they need a real game.log the
+ *    macOS dev sidecar can't produce), but their element types (`FactionStanding`, `RepBar`,
+ *    `ClosestPool`, `RecentMissionEntry`/`RecentBlueprintEntry`, `JustReceived`, `RepEntry`) are
+ *    CONFIRMED anyway — transcribed from `sc-overlay/src/missions.ts` directly, not guessed. The
+ *    two exceptions still typed from mockup prose rather than source are `OtherPoolEntry` and
+ *    `CompletionInfo` — see their own comments. A field with genuinely no lead at all is typed
+ *    `unknown` rather than guessed — guessing a wrong shape is worse than an honest `unknown`.
  */
 
 // ---------------------------------------------------------------------------
@@ -22,6 +27,18 @@ export interface Payout {
 	min: number;
 	max: number;
 	currency: string;
+}
+
+/**
+ * The shape money-formatting helpers actually need — both `Payout` (top-level, `min`/`currency`
+ * always non-null in every sample) and `CompletionPayout` (nullable `min`/`currency` — see its own
+ * comment) satisfy this structurally, so `formatPayoutRange`/`resolvePayoutLine` work on either
+ * without a cast.
+ */
+export interface PayoutLike {
+	min: number | null;
+	max: number;
+	currency: string | null;
 }
 
 /**
@@ -112,6 +129,209 @@ export interface Unrecognized {
 	packActive: boolean;
 }
 
+/**
+ * One entry in `standings[]` (the idle-mode list). CONFIRMED against `sc-overlay/src/missions.ts:126`
+ * (docs/API.md's "arrays that are always empty in dev" section — no fixture has one populated,
+ * but the shape is read straight from source, not guessed). `pct` is 0-100 through the current
+ * rank — that's the real bar StandingRow can draw. `estimate`/`curMin`/`nextMin` are carried but
+ * "never displayed" per source comment; don't build UI around them.
+ */
+export interface FactionStanding {
+	faction: string;
+	scope: string;
+	/** Current rank label, e.g. "Sr. Contractor". */
+	standing: string;
+	/** The named next rank, e.g. "Veteran Contractor". Null at max rank. */
+	nextName: string | null;
+	/** 0-100 through the current rank. */
+	pct: number;
+	/** Raw rep-to-go fallback, shown (with a tilde) only when `contractsToGo` is null. */
+	toGo: number | null;
+	/** The plan-shaped estimate — prefer this over `toGo` whenever it's non-null. */
+	contractsToGo: number | null;
+	nextRewards: string[];
+	estimate: number;
+	curMin: number;
+	nextMin: number | null;
+}
+
+/**
+ * The TRACKED contract's reputation bar — CONFIRMED, `missions.ts:168` (docs/DESIGN.md Appendix
+ * A). A different shape from `FactionStanding` (idle mode's list): notably NO `pct` — derive
+ * `clamp((estimate - curMin) / (nextMin - curMin), 0, 1)` when `nextMin` is non-null, `max` means
+ * full. `contractsToGo` isn't here either; it comes from the `standings[]` entry whose `faction`
+ * matches this bar's, falling back to `~(nextMin - estimate) rep to go` when nothing matched.
+ */
+export interface RepBar {
+	scope: string;
+	faction: string;
+	standing: string;
+	nextName: string | null;
+	nextRank: number | null;
+	nextRewards: string[];
+	estimate: number;
+	curMin: number;
+	nextMin: number | null;
+	max: boolean;
+	offTrack?: boolean;
+	noData: boolean;
+}
+
+/**
+ * `otherPools[]` — CONFIRMED, `missions.ts` `TrackedView` (docs/DESIGN.md Appendix A). Other star
+ * systems where the SAME contract title drops a pool, rendered as "Stanton · 2 / 6" per
+ * docs/DESIGN.md §5.1. Note `places` is PLURAL — one entry can name more than one place sharing
+ * the same owned/total, unlike the singular `place` an earlier draft of this type guessed.
+ */
+export interface OtherPoolEntry {
+	places: string[];
+	owned: number;
+	total: number;
+}
+
+/**
+ * `closestPools[]` (the idle-mode "between contracts" cards) — CONFIRMED, `missions.ts:69`
+ * (docs/DESIGN.md Appendix A). The pay/dur/rep/cooldown fields are carried but intentionally NOT
+ * rendered — docs/DESIGN.md §5.2: "the per-hour figure belongs to the session tracker, not to
+ * 'closest to done'." Typed anyway rather than dropped, per this file's own honesty rule about
+ * not throwing away bytes the server sends.
+ */
+export interface ClosestPool {
+	poolUuid: string;
+	key: string;
+	title: string;
+	poolName: string;
+	/** Shortest first; show `[0]` and a count of the rest. */
+	missionTitles: string[];
+	variants: number;
+	/** What you still need, alphabetical — the tie-breaker between look-alike pools. */
+	missing: string[];
+	owned: number;
+	total: number;
+	places: string[];
+	/** DO NOT RENDER — docs/DESIGN.md §5.2. */
+	payMin: number | null;
+	/** DO NOT RENDER. */
+	payMax: number | null;
+	/** DO NOT RENDER. */
+	payoutEstimated: boolean;
+	/** DO NOT RENDER. */
+	durMin: number | null;
+	/** DO NOT RENDER. */
+	rep: number | null;
+	/** DO NOT RENDER. */
+	cooldownMin: number | null;
+	giver: string | null;
+	missionType: string | null;
+}
+
+/**
+ * One `recentMissions[]` entry — CONFIRMED, `missions.ts:565`. Both fields below are the
+ * APP-INTERNAL form, normalized once by `sanitizeMissionView`:
+ *  - `title` is nullable on the wire; the overlay falls back to the literal "Mission"
+ *    (`overlay/missions-tracker.js:542`) rather than inventing its own placeholder, and the
+ *    sanitizer applies that same fallback so this is never actually null by the time a component
+ *    sees it.
+ *  - `at` — the wire sends an ISO 8601 string (`missions.ts:2058`), parsed once into epoch ms (an
+ *    entry whose `at` fails to parse is dropped, per docs/API.md's "guard the NaN" warning).
+ */
+export interface RecentMissionEntry {
+	title: string;
+	at: number;
+	aUEC: number | null;
+}
+
+/** One `recentBlueprints[]` entry — CONFIRMED, `missions.ts:572`. `at` is parsed, see RecentMissionEntry. */
+export interface RecentBlueprintEntry {
+	name: string;
+	at: number;
+	item: string | null;
+	image: string | null;
+	imageFallback: string | null;
+}
+
+/** The tier-ladder pointer shown under PoolProgress when a contract has one. Ladder itself is out of v1 scope. */
+export interface EventTrack {
+	name: string;
+	note: string | null;
+}
+
+/** One `itemRewards[]` entry — non-blueprint rewards, e.g. "2× Medpen". No populated sample seen. */
+export interface ItemReward {
+	name: string;
+	qty: number;
+	owned: boolean;
+}
+
+/** `reputationGained[]`/`reputationLost[]` and `CompletionInfo.reputationGained` — CONFIRMED, `missions.ts:44`. */
+export interface RepEntry {
+	faction: string;
+	scope: string;
+	amount: number;
+}
+
+/** A blueprint award as it appears in `justReceived` and `completion.blueprints` — `missions.ts:616`. */
+export interface BlueprintReward {
+	name: string;
+	item: string | null;
+	image: string | null;
+	imageFallback: string | null;
+}
+
+/**
+ * Drives the unlock-alert moment (docs/DESIGN.md §5.4 ReceivedFlash) — a `BlueprintReward` plus
+ * `at`, CONFIRMED shape (`missions.ts:616`). Identity is `at` — a re-render with the same `at`
+ * must not restart the flash. `at` is the parsed (epoch ms) form — see RecentMissionEntry.
+ */
+export interface JustReceived extends BlueprintReward {
+	at: number;
+}
+
+/**
+ * The completion payout can be MORE null than the top-level `Payout` — `min`/`currency` are both
+ * nullable here, unlike every `Payout` instance seen elsewhere. Kept as its own type rather than
+ * relaxing `Payout` itself and losing that non-nullability everywhere else.
+ */
+export interface CompletionPayout {
+	min: number | null;
+	max: number;
+	currency: string | null;
+}
+
+/**
+ * The after-action card (docs/DESIGN.md §5.4 CompletionCard) — CONFIRMED, `missions.ts:799`
+ * (docs/DESIGN.md Appendix A). Identity is `at`, ISO on the wire like every other `at` here,
+ * parsed to epoch ms by `sanitizeMissionView`. `title` is nullable — CompletionCard omits that
+ * line rather than inventing a placeholder when it is.
+ */
+export interface CompletionInfo {
+	at: number;
+	title: string | null;
+	/** Logged live — the one place "aUEC" (not "payout"/"estimated") is earned, per docs/DESIGN.md §6.1. */
+	aUEC: number | null;
+	payout: CompletionPayout | null;
+	payoutEstimated: boolean;
+	facts: MissionFacts | null;
+	durationMs: number | null;
+	blueprints: BlueprintReward[];
+	contractKey: string | null;
+	giver: string | null;
+	missionType: string | null;
+	rank: number | null;
+	reputationGained: RepEntry[];
+	/** Dim mono `~2.9M aUEC/hr`; tilde when `payoutEstimated`. Omitted when null. */
+	aUecPerHour: number | null;
+	timesCompleted: number | null;
+	/** The authoritative "pool now X/Y" figure for THIS completion — don't substitute the frame's `totals`. */
+	poolProgress: { owned: number; total: number } | null;
+	/** Not rendered in v1; carried for completeness. */
+	classification: {
+		combat: unknown | null;
+		activity: unknown | null;
+		source: "generator" | "missionType" | null;
+	};
+}
+
 export interface ShipInfo {
 	type: string;
 	theme: string;
@@ -172,47 +392,34 @@ export interface MissionView {
 	payoutEstimated: boolean;
 	facts: MissionFacts | null;
 	/** No populated sample seen. */
-	itemRewards: unknown[];
+	itemRewards: ItemReward[];
 	giver: string | null;
 	inferredRank: unknown | null;
-	repBar: unknown | null;
+	repBar: RepBar | null;
 	missionType: string | null;
 	whereToGet: string[];
 	illegal: boolean;
 	rankRequired: number | null;
 	rankRequiredName: string | null;
-	/** No populated sample seen. */
-	otherPools: unknown[];
-	/** No populated sample seen. */
-	reputationGained: unknown[];
-	/** No populated sample seen. */
-	reputationLost: unknown[];
-	eventTrack: unknown | null;
+	otherPools: OtherPoolEntry[];
+	reputationGained: RepEntry[];
+	reputationLost: RepEntry[];
+	eventTrack: EventTrack | null;
 	completed: boolean;
 	pools: BlueprintPool[];
 	totals: { owned: number; total: number };
 	collectedTotal: number;
-	/** No populated sample seen. */
-	recentMissions: unknown[];
-	/** No populated sample seen. */
-	recentBlueprints: unknown[];
-	/**
-	 * Pools nearest completion (the between-contracts screen). Assumed to reuse the same
-	 * BlueprintPool shape as `pools` — API.md calls them "pools" too — but this is UNVERIFIED:
-	 * the only sample we have is the empty-tracker state, where it's `[]`. If a populated sample
-	 * shows a different shape, fix this rather than trusting the assumption.
-	 */
-	closestPools: BlueprintPool[];
-	/** Reputation per mission giver. No populated sample seen. */
-	standings: unknown[];
+	recentMissions: RecentMissionEntry[];
+	recentBlueprints: RecentBlueprintEntry[];
+	/** Pools nearest completion (the between-contracts screen). CONFIRMED shape — see `ClosestPool`. */
+	closestPools: ClosestPool[];
+	standings: FactionStanding[];
 	earnings: Earnings;
-	/** Drives the unlock-alert moment. No populated sample seen. */
-	justReceived: unknown | null;
+	justReceived: JustReceived | null;
 	unrecognized: Unrecognized;
-	/** The after-action card. No populated sample seen. */
-	completion: unknown | null;
+	completion: CompletionInfo | null;
 	selectedId: string | null;
-	/** Accepted contracts, for the picker. No populated sample seen. */
+	/** Accepted contracts, for the picker. No populated sample seen — only `.length` is used in v1. */
 	missions: unknown[];
 	community: CommunityInfo | null;
 	appVersion: string;
@@ -274,15 +481,12 @@ export interface MissionPreview {
 	rankRequiredName: string | null;
 	payout: Payout | null;
 	payoutEstimated: boolean;
-	/** No populated sample seen. */
-	reputationGained: unknown[];
-	/** No populated sample seen. */
-	reputationLost: unknown[];
+	reputationGained: RepEntry[];
+	reputationLost: RepEntry[];
 	whereToGet: string[];
-	/** No populated sample seen. */
-	otherPools: unknown[];
+	otherPools: OtherPoolEntry[];
 	inferredRank: unknown | null;
-	repBar: unknown | null;
+	repBar: RepBar | null;
 	ambiguous: boolean;
 	hasPool: boolean;
 	facts: MissionFacts | null;

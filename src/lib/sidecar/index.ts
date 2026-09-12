@@ -13,10 +13,13 @@ export {
 export type { SidecarHost } from "./http-client";
 export {
 	baseUrlFor,
+	hostForDisplay,
+	hostWithPort,
 	normalizeHostInput,
 	normalizeManufacturer,
 	SidecarHttpClient,
 } from "./http-client";
+export { sanitizeMissionView } from "./sanitize";
 export type { SseHandlers, SseSubscription } from "./sse-client";
 export { subscribeToMissionEvents } from "./sse-client";
 export * from "./types";

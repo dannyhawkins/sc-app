@@ -31,6 +31,28 @@ export function baseUrlFor(host: SidecarHost): string {
 }
 
 /**
+ * Display form for a clean `host[:port]` — drops the port when it's the sidecar default (8778),
+ * so the everyday case reads `192.168.1.20 · live` rather than `192.168.1.20:8778 · live` (per
+ * designer's note on StatusBar/UnreachableBanner). The Connect screen's error copy deliberately
+ * keeps the port even in the default case — that's where the user is debugging what they typed —
+ * so don't use this for that copy, only for the status bar and the unreachable banner's headline.
+ */
+export function hostForDisplay(host: SidecarHost): string {
+	const normalized = normalizeHostInput(host);
+	return normalized.replace(new RegExp(`:${DEFAULT_PORT}$`), "");
+}
+
+/**
+ * `host[:port]` with the port ALWAYS present (adding the default if none was given) — the
+ * opposite of `hostForDisplay`. Used by copy that's deliberately showing the user exactly what
+ * was dialled: Connect's "Nothing answered at…" error and the Unreachable banner's cold-start
+ * headline (docs/DESIGN.md §4/§5.3).
+ */
+export function hostWithPort(host: SidecarHost): string {
+	return baseUrlFor(host).replace(/^https?:\/\//, "");
+}
+
+/**
  * `manufacturer` on a blueprint-detail response comes back as the literal string
  * "<= PLACEHOLDER =>" for at least some items (verified against the live sidecar). Per
  * docs/API.md, treat that as absent rather than rendering it.
