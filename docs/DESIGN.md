@@ -162,14 +162,17 @@ re-enters via `stale` until a probe returns, so we never show stale data as live
 
 ## 4. Screen: Connect
 
-The cold-start screen and the "change address" screen. Deliberately boring.
+The cold-start screen and the "change address" screen. Deliberately boring — but it is the first
+screen anyone sees, so the boring has to look finished.
 
 ```
-  SC OVERLAY · COMPANION
+  ┃ SC OVERLAY                                          ← label, accent left bar, 64pt from top
+  ┃ Companion
+  Your PC's mission tracker, on the phone next to it.  ← the one "what this is" line in the app
 
   Your PC's address
   ┌──────────────────────────┐
-  │ 192.168.1.20             │   ← numeric keypad w/ `.` and `:`
+  │ 192.168.1.20             │   ← mono, numeric keypad w/ `.` and `:`
   └──────────────────────────┘
   Port 8778 unless you changed it.
   In SC Overlay: Settings → Browser sources & extra monitors
@@ -179,7 +182,43 @@ The cold-start screen and the "change address" screen. Deliberately boring.
 
   Recent
   · 192.168.1.20   last seen today 14:32
+
+                    (flex: 1)
+
+  Read-only. Talks only to your PC, only on this wifi.  ← footer, pinned to the bottom, caption dim
 ```
+
+**Layout — decided, not inherited.** Top-anchored, everything left-aligned including the title
+(the centred title was incidental; a left-aligned block reads as one column, and the accent bar
+on the wordmark is the same gesture as the mission title's on the Tracker). Not vertically
+centred: the block grows (error line, recents list) and a centred block that jumps as it grows
+looks worse than a stable top. The keyboard argument is real but only covers the moment of
+typing; before the first tap and after a failed connect the void is there, so the void gets a
+job at both ends:
+
+- **Top:** the wordmark and the one-line description. This is the only place the app says what
+  it is, and it belongs on the screen a new user is staring at while wondering where to find an
+  IP address.
+- **Bottom:** a caption pinned to the bottom edge with the privacy posture — read-only, LAN only.
+  That is the overlay's whole stance (see its README) and a cold-start screen asking for a network
+  address is exactly where a user wonders what the app is going to do with it. The keyboard
+  covers the footer while typing, which is fine — it is not needed while typing.
+
+`KeyboardAvoidingView` around the form so the button stays above the keyboard; the footer is
+outside it and may be covered.
+
+**Connect button states.** A disabled button that looks dead is correct behaviour with a bad
+signal, so each state looks different:
+
+| State | Fill | Border | Label |
+|---|---|---|---|
+| empty / unparseable | none | `hairline` | `Connect`, `textFaint` |
+| ready (field parses) | `accentSoft` | `rgba(accentRgb, .5)` | `Connect`, `text` |
+| testing | `accentSoft` | same | `Connecting…`, `text`, non-pressable |
+| after failure | back to *ready*; the error line under the field carries the message | | |
+
+The transition empty → ready happens the instant the field parses (on every keystroke, no
+debounce), so the button visibly wakes up as the address is typed.
 
 Field: one text input, `keyboardType: "numbers-and-punctuation"`, accepts `host`, `host:port`,
 or a pasted `http://host:port/`. Normalises to `http://host:port`. Default port **8778**.

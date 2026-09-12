@@ -181,10 +181,33 @@ RepBar {
   scope: string; faction: string; standing: string;
   nextName: string | null; nextRank: number | null; nextRewards: string[];
   estimate: number; curMin: number; nextMin: number | null;
-  max: boolean;
+  max: boolean;          // top of the ladder, no next rank
+  offTrack?: boolean;    // see below — honesty-critical
+  noData: boolean;       // see below — honesty-critical
 }
-// ⚠️ RepBar has NO `pct`. Derive it from estimate/curMin/nextMin, or draw no bar.
+```
 
+⚠️ **`RepBar` has no `pct`** where `FactionStanding` does. Derive it — the same arithmetic the
+server uses for `FactionStanding.pct`, so the tracked bar and the idle screen's bar agree for the
+same giver:
+
+```ts
+clamp((estimate - curMin) / (nextMin - curMin), 0, 1)   // max, or nextMin === null → full
+```
+
+🔴 **`offTrack` and `noData` are not decoration — they're two of the honesty rules.** Both were
+missing from an earlier draft of this file, and a client built against that draft dropped them.
+
+- **`offTrack`** means *this contract will not move this bar.* The contract pays reputation into a
+  track the app doesn't rank, so the standing shown is the giver's own, earned from their other
+  work. It is not rare: **384 of 4,075 contracts** pay only unranked tracks. The overlay's own
+  note on why this must be said out loud — *"or the number is a lie by implication sitting next to
+  a +500 reputation pill."*
+- **`noData`** means no completions have been witnessed for this giver yet. Show an
+  "estimate unavailable" state, **not** a zero-progress bar — a bar sitting at 0% asserts "you
+  have made no progress", which is a different and false claim.
+
+```ts
 // missions.ts:69 — closestPools[]
 ClosestPool {
   poolUuid: string; key: string; title: string; poolName: string;
