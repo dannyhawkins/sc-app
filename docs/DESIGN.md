@@ -403,7 +403,7 @@ it is honest). `nextRewards` as a dim `· unlocks Prospector` suffix when presen
   4 contracts · 1,250 rep · ~86,000 aUEC from 3 of 4 · est.
 ```
 
-- `aUECTotal === null` → the money segment reads `—`, never `0`.
+- `aUECTotal === null` → the money segment reads `— aUEC`, never `0`.
 - `aUECEstimated` → tilde + `est.`; `aUECModelled` → `modelled` instead, amber. Both flags are
   currently always true whenever there is a figure at all, so design for the tilde being the norm.
 - `aUECFrom` / `missions` always shown together (`from 3 of 4`) so a total from a subset can't
@@ -508,8 +508,22 @@ Inputs: `{aUEC?, payout, payoutEstimated, community?}`. Precedence, highest firs
 
 - `payout.min === payout.max` → one figure. Differ → `450,000–681,750`. `min` 0 or null →
   `up to 681,750`.
-- Currency `UEC` renders as `aUEC` — that is what the overlay and the players say.
 - The phone **never** adds money. Totals come from `earnings`, already filtered by the server.
+
+**The wording rule — the provenance word *is* the unit.** A money figure is followed by exactly
+one word, and that word says where the number came from: `aUEC` (the game logged it), `reported`
+(players said so), `payout` (game files), `estimated` / `est.` / `modelled` (a model, with a
+tilde). There is never a second unit word: `~681,750 estimated`, not `~681,750 aUEC estimated`.
+This is the overlay's convention verbatim, and it only works if `aUEC` is reserved for the one
+case it is earned — the moment you write `aUEC` next to an estimate, the word stops meaning
+anything. Corollaries:
+
+- `recentMissions[].aUEC` is a logged award, so `12,500 aUEC` is correct there.
+- `earnings.aUECTotal` is built from listed payouts (`aUECEstimated` is true whenever there is a
+  figure), so it renders `~86,000 est.` — or `~86,000 modelled` when `aUECModelled` — never
+  `aUEC`.
+- A dash has no provenance, so it carries the plain unit as a slot name: `— aUEC`.
+- The wire's `currency: "UEC"` is never printed; the players say aUEC and so do we.
 
 ### 6.2 Estimates carry a tilde and a word
 

@@ -7,17 +7,14 @@ import { type } from "@/theme/typography";
 /**
  * docs/DESIGN.md §5.2: only what the server hands over, never summed on the phone. `aUECFrom`/
  * `missions` always shown together so a total from a subset can't read as the whole session.
+ *
+ * NOTE: the design PROSE says `missions === 0` should read "No completions yet this session."
+ * instead of the figures — but docs/mockup.html's own `EarningsStrip · missions-empty.json,
+ * verbatim` fragment renders `0 contracts · 0 rep · — aUEC` for that exact fixture (`missions:
+ * 0`), twice, with an explanatory caption about the dash. Went with the mockup (the more
+ * concrete, deliberately-captioned artifact) over the prose; flagged the conflict back to design.
  */
 export function EarningsStrip({ earnings }: { earnings: Earnings }) {
-	if (earnings.missions === 0) {
-		return (
-			<View style={styles.container}>
-				<Text style={type.label}>THIS SESSION</Text>
-				<Text style={[type.caption, styles.dim]}>No completions yet this session.</Text>
-			</View>
-		);
-	}
-
 	const moneyPart = moneyText(earnings);
 
 	return (
@@ -35,7 +32,7 @@ export function EarningsStrip({ earnings }: { earnings: Earnings }) {
 }
 
 function moneyText(earnings: Earnings): { text: string; color: string } {
-	if (earnings.aUECTotal == null) return { text: "—", color: colors.textDim };
+	if (earnings.aUECTotal == null) return { text: "— aUEC", color: colors.textDim };
 	const figure = formatThousands(earnings.aUECTotal);
 	const from = `from ${earnings.aUECFrom} of ${earnings.missions}`;
 	if (earnings.aUECModelled)

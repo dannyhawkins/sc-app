@@ -155,6 +155,12 @@ function extractReportedFigure(value: unknown): string | null {
  * docs/DESIGN.md §6.1's `PayoutLine` precedence, exactly: logged live (completion's `aUEC`) →
  * player-reported (`community.payout`) → from game files (`payout`, not estimated) → modelled
  * (`payout`, estimated) → nothing. The phone never sums or invents a figure; `—` not `0`.
+ *
+ * `aUEC` is the currency unit and always appears (docs/mockup.html's tracked-mission fragment,
+ * built verbatim from `mission-preview.json`, renders the modelled case as
+ * "~681,750 aUEC estimated" — not "~681,750 estimated" as §6.1's own summary table shows it).
+ * The provenance word after it is what changes; for the logged-live case "aUEC" already IS that
+ * word, so nothing is appended twice.
  */
 export function resolvePayoutLine(input: {
 	aUEC?: number | null;
@@ -167,13 +173,13 @@ export function resolvePayoutLine(input: {
 	if (aUEC != null) return { text: `${formatThousands(aUEC)} aUEC`, tone: "value" };
 
 	const reported = community?.payout != null ? extractReportedFigure(community.payout) : null;
-	if (reported != null) return { text: `${reported} reported`, tone: "value" };
+	if (reported != null) return { text: `${reported} aUEC reported`, tone: "value" };
 
 	if (payout != null && !payoutEstimated) {
-		return { text: `${formatPayoutRange(payout)} payout`, tone: "value" };
+		return { text: `${formatPayoutRange(payout)} aUEC payout`, tone: "value" };
 	}
 	if (payout != null && payoutEstimated) {
-		return { text: `~${formatPayoutRange(payout)} estimated`, tone: "estimate" };
+		return { text: `~${formatPayoutRange(payout)} aUEC estimated`, tone: "estimate" };
 	}
 	return { text: "—", tone: "dim" };
 }
