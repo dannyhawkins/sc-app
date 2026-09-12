@@ -62,9 +62,14 @@ export default function ConnectScreen() {
 					    the cheapest way for the two screens to read as one product. */}
 					<View style={styles.wordmarkRow}>
 						<View style={[styles.accentBar, { backgroundColor: accent }]} />
+						{/* This app's OWN name. It used to read "SC OVERLAY / Companion", which used
+						    another project's name as this one's masthead — their licence says plainly
+						    that names and logos are not licensed and a port must carry its own name.
+						    Naming SC Overlay elsewhere (telling the user where to find their PC's
+						    address, or that nothing answered) is referential and stays. */}
 						<View>
-							<Text style={type.label}>SC OVERLAY</Text>
-							<Text style={[type.body, styles.companion]}>Companion</Text>
+							<Text style={type.label}>SC COMPANION</Text>
+							<Text style={[type.body, styles.companion]}>for Star Citizen</Text>
 						</View>
 					</View>
 					{/* The only place the app says what it is. It belongs in front of someone who is
