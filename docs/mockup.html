@@ -69,7 +69,7 @@
   /* Pool groups + rows */
   .group { margin-top: 16px; }
   .glabel { font: 600 13px/16px var(--sans); letter-spacing: 1px; text-transform: uppercase; color: var(--dim); padding: 6px 0; }
-  .row { min-height: 52px; display: flex; align-items: center; gap: 12px; border-top: 1px solid var(--hairline); padding: 8px 0; }
+  .row { min-height: 56px; display: flex; align-items: center; gap: 12px; border-top: 1px solid var(--hairline); padding: 8px 0; }
   .row:last-child { border-bottom: 1px solid var(--hairline); }
   .glyph { width: 20px; text-align: center; font: 600 16px/20px var(--mono); color: var(--faint); flex: none; }
   .row.owned .glyph { color: var(--owned); }
@@ -77,7 +77,8 @@
   .row.owned .name { color: var(--dim); font-weight: 500; }
   .row .src { font: 500 13px/16px var(--sans); color: var(--faint); margin-left: 6px; }
   .chance { font: 500 15px/20px var(--mono); color: var(--value); font-variant-numeric: tabular-nums; }
-  .sub { font: 500 13px/16px var(--sans); color: var(--dim); }
+  .sub { font: 500 13px/16px var(--sans); color: var(--dim); display: block; margin-top: 2px; font-weight: 500; }
+  .name .chance { margin-left: 8px; }
   .slot { width: 44px; flex: none; text-align: right; color: var(--faint); font: 400 18px/20px var(--sans); } /* reserved: future toggle */
 
   .note { margin-top: 16px; padding: 12px 14px; border: 1px solid var(--hairline); border-radius: 10px; background: var(--surface); font: 500 15px/20px var(--sans); color: var(--dim); }
@@ -148,19 +149,19 @@
 
           <div class="group">
             <div class="glabel">Weapons</div>
-            <div class="row"><span class="glyph">○</span><span class="name">Pulse Laser Pistol</span><span class="sub">Sidearms</span><span class="slot">›</span></div>
+            <div class="row"><span class="glyph">○</span><span class="name">Pulse Laser Pistol<small class="sub">Sidearms</small></span><span class="slot">›</span></div>
           </div>
           <div class="group">
             <div class="glabel">Ammo</div>
-            <div class="row"><span class="glyph">○</span><span class="name">Pulse Laser Pistol Battery (60 Cap)</span><span class="sub">Magazines</span><span class="slot">›</span></div>
+            <div class="row"><span class="glyph">○</span><span class="name">Pulse Laser Pistol Battery (60 Cap)<small class="sub">Magazines</small></span><span class="slot">›</span></div>
           </div>
           <div class="group">
             <div class="glabel">Armor</div>
-            <div class="row"><span class="glyph">○</span><span class="name">Testudo Arms Earthshake</span><span class="sub">Arms</span><span class="slot">›</span></div>
-            <div class="row"><span class="glyph">○</span><span class="name">Testudo Backpack Earthshake</span><span class="sub">Backpacks</span><span class="slot">›</span></div>
-            <div class="row"><span class="glyph">○</span><span class="name">Testudo Core Earthshake</span><span class="sub">Core</span><span class="slot">›</span></div>
-            <div class="row"><span class="glyph">○</span><span class="name">Testudo Helmet Earthshake</span><span class="sub">Helmets</span><span class="slot">›</span></div>
-            <div class="row"><span class="glyph">○</span><span class="name">Testudo Legs Earthshake</span><span class="sub">Legs</span><span class="slot">›</span></div>
+            <div class="row"><span class="glyph">○</span><span class="name">Testudo Arms Earthshake<small class="sub">Arms</small></span><span class="slot">›</span></div>
+            <div class="row"><span class="glyph">○</span><span class="name">Testudo Backpack Earthshake<small class="sub">Backpacks</small></span><span class="slot">›</span></div>
+            <div class="row"><span class="glyph">○</span><span class="name">Testudo Core Earthshake<small class="sub">Core</small></span><span class="slot">›</span></div>
+            <div class="row"><span class="glyph">○</span><span class="name">Testudo Helmet Earthshake<small class="sub">Helmets</small></span><span class="slot">›</span></div>
+            <div class="row"><span class="glyph">○</span><span class="name">Testudo Legs Earthshake<small class="sub">Legs</small></span><span class="slot">›</span></div>
           </div>
         </div>
         <div class="tabs">
@@ -193,19 +194,19 @@
           </div>
           <div class="group">
             <div class="glabel">Weapons</div>
-            <div class="row"><span class="glyph">○</span><span class="name">Pulse Laser Pistol</span><span class="sub">Sidearms</span><span class="slot">›</span></div>
+            <div class="row"><span class="glyph">○</span><span class="name">Pulse Laser Pistol<small class="sub">Sidearms</small></span><span class="slot">›</span></div>
           </div>
           <div class="group">
             <div class="glabel">Ammo</div>
-            <div class="row"><span class="glyph">○</span><span class="name">Pulse Laser Pistol Battery (60 Cap)</span><span class="sub">Magazines</span><span class="slot">›</span></div>
+            <div class="row"><span class="glyph">○</span><span class="name">Pulse Laser Pistol Battery (60 Cap)<small class="sub">Magazines</small></span><span class="slot">›</span></div>
           </div>
           <div class="group">
             <div class="glabel">Armor</div>
-            <div class="row"><span class="glyph">○</span><span class="name">Testudo Arms Earthshake</span><span class="sub">Arms</span><span class="slot">›</span></div>
-            <div class="row"><span class="glyph">○</span><span class="name">Testudo Backpack Earthshake</span><span class="sub">Backpacks</span><span class="slot">›</span></div>
-            <div class="row"><span class="glyph">○</span><span class="name">Testudo Core Earthshake</span><span class="sub">Core</span><span class="slot">›</span></div>
-            <div class="row"><span class="glyph">○</span><span class="name">Testudo Helmet Earthshake</span><span class="sub">Helmets</span><span class="slot">›</span></div>
-            <div class="row"><span class="glyph">○</span><span class="name">Testudo Legs Earthshake</span><span class="sub">Legs</span><span class="slot">›</span></div>
+            <div class="row"><span class="glyph">○</span><span class="name">Testudo Arms Earthshake<small class="sub">Arms</small></span><span class="slot">›</span></div>
+            <div class="row"><span class="glyph">○</span><span class="name">Testudo Backpack Earthshake<small class="sub">Backpacks</small></span><span class="slot">›</span></div>
+            <div class="row"><span class="glyph">○</span><span class="name">Testudo Core Earthshake<small class="sub">Core</small></span><span class="slot">›</span></div>
+            <div class="row"><span class="glyph">○</span><span class="name">Testudo Helmet Earthshake<small class="sub">Helmets</small></span><span class="slot">›</span></div>
+            <div class="row"><span class="glyph">○</span><span class="name">Testudo Legs Earthshake<small class="sub">Legs</small></span><span class="slot">›</span></div>
           </div>
         </div>
         <div class="banner">
@@ -234,9 +235,9 @@
 
     <div class="frag">
       <div class="cap">BlueprintRow · owned, hand-marked, real odds</div>
-      <div class="row owned"><span class="glyph">✓</span><span class="name">Testudo Helmet Earthshake</span><span class="sub">Helmets</span><span class="slot">›</span></div>
-      <div class="row owned"><span class="glyph">✓</span><span class="name">Testudo Core Earthshake<span class="src">· marked by hand</span></span><span class="sub">Core</span><span class="slot">›</span></div>
-      <div class="row"><span class="glyph">○</span><span class="name">Pulse Laser Pistol</span><span class="chance">62%</span><span class="sub">Sidearms</span><span class="slot">›</span></div>
+      <div class="row owned"><span class="glyph">✓</span><span class="name">Testudo Helmet Earthshake<small class="sub">Helmets</small></span><span class="slot">›</span></div>
+      <div class="row owned"><span class="glyph">✓</span><span class="name">Testudo Core Earthshake<span class="src">· marked by hand</span><small class="sub">Core</small></span><span class="slot">›</span></div>
+      <div class="row"><span class="glyph">○</span><span class="name">Pulse Laser Pistol<span class="chance">62%</span><small class="sub">Sidearms</small></span><span class="slot">›</span></div>
       <div style="font:500 12px/16px var(--sans);color:var(--faint);margin-top:8px">Row order never changes. Trailing 44pt is empty on purpose — the owned toggle lands there when pairing ships. <code style="font:11px var(--mono)">chance: 1</code> shows nothing; the 62% is illustrative, the fixture pool is all guaranteed.</div>
     </div>
 

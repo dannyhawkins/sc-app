@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { formatRelativeOrClock } from "@/lib/format";
 import type { RecentHost } from "@/lib/sidecar";
 import { hostForDisplay, hostWithPort, normalizeHostInput, testSidecarHost } from "@/lib/sidecar";
+import { useAccent } from "@/theme/accent";
 import { colors, radii, spacing } from "@/theme/tokens";
 import { type } from "@/theme/typography";
 
@@ -31,7 +32,9 @@ export function HostForm({ initial, recents, onConnect }: HostFormProps) {
 	const [status, setStatus] = useState<FieldStatus>({ kind: "idle" });
 
 	const normalized = useMemo(() => normalizeHostInput(value), [value]);
-	const canSubmit = normalized.length > 0 && status.kind !== "testing";
+	const { accent, accentSoft } = useAccent();
+	const parses = normalized.length > 0;
+	const canSubmit = parses && status.kind !== "testing";
 
 	async function handleConnect() {
 		if (!canSubmit) return;
@@ -92,9 +95,16 @@ export function HostForm({ initial, recents, onConnect }: HostFormProps) {
 			<Pressable
 				onPress={handleConnect}
 				disabled={!canSubmit}
-				style={[styles.button, !canSubmit && styles.buttonDisabled]}
+				style={[
+					styles.button,
+					// docs/DESIGN.md §4: three states that LOOK different. A disabled control that
+					// reads as dead is correct behaviour with a bad signal — the empty state has to
+					// look like something that will wake up, and it wakes on the keystroke that makes
+					// the field parse (no debounce), so typing an address visibly arms the button.
+					parses ? { backgroundColor: accentSoft, borderColor: accent } : styles.buttonEmpty,
+				]}
 			>
-				<Text style={[type.bodyStrong, styles.buttonText]}>
+				<Text style={[type.bodyStrong, parses ? styles.buttonText : styles.buttonTextEmpty]}>
 					{status.kind === "testing" ? "Connecting…" : "Connect"}
 				</Text>
 			</Pressable>
@@ -147,17 +157,21 @@ const styles = StyleSheet.create({
 		color: colors.danger,
 	},
 	button: {
-		backgroundColor: colors.surface2,
 		borderRadius: radii.card,
 		paddingVertical: spacing.sm,
 		alignItems: "center",
 		marginTop: spacing.xs,
+		borderWidth: 1,
 	},
-	buttonDisabled: {
-		opacity: 0.4,
+	buttonEmpty: {
+		backgroundColor: "transparent",
+		borderColor: colors.hairline,
 	},
 	buttonText: {
 		color: colors.text,
+	},
+	buttonTextEmpty: {
+		color: colors.textFaint,
 	},
 	recents: {
 		marginTop: spacing.lg,

@@ -5,6 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { SearchField } from "@/components/lookup/SearchField";
 import { SearchResultRow } from "@/components/lookup/SearchResultRow";
 import { UnreachableBanner } from "@/components/tracker/UnreachableBanner";
+import { StatusBar } from "@/components/ui/StatusBar";
 import { fixtures, type MissionSearchResult } from "@/lib/sidecar";
 import { useSidecarClient } from "@/lib/use-sidecar-client";
 import { useConnectionStore } from "@/store/connection-store";
@@ -23,6 +24,11 @@ export default function LookupScreen() {
 	const client = useSidecarClient();
 	const mode = useConnectionStore((state) => state.mode);
 	const host = useConnectionStore((state) => state.host);
+	// docs/DESIGN.md §3: "one state machine, one status bar on every screen". Without it, the
+	// connection can go stale while you sit on this tab with nothing on screen saying so.
+	const conn = useConnectionStore((state) => state.conn);
+	const lastSeenAt = useConnectionStore((state) => state.lastSeenAt);
+	const frame = useConnectionStore((state) => state.frame);
 	const { accent } = useAccent();
 	const [query, setQuery] = useState("");
 	const [results, setResults] = useState<MissionSearchResult[] | null>(null);
@@ -65,6 +71,18 @@ export default function LookupScreen() {
 
 	return (
 		<SafeAreaView style={styles.screen} edges={["top"]}>
+			<StatusBar
+				conn={conn}
+				isSampleData={mode === "mock"}
+				host={host}
+				lastSeenAt={lastSeenAt}
+				accent={accent}
+				patch={frame?.patch}
+				logEnv={frame?.logEnv}
+				build={frame?.build}
+				shipName={frame?.ship.ship}
+				onPressHostChip={() => router.push("/connect")}
+			/>
 			<View style={styles.content}>
 				<SearchField value={query} onChangeText={setQuery} />
 				{renderBody()}
@@ -85,7 +103,14 @@ export default function LookupScreen() {
 			);
 		}
 		if (query.trim().length < MIN_CHARS) {
-			return <Text style={[type.body, styles.centeredDim]}>Search any of 1,999 contracts.</Text>;
+			// NOT the search field's own placeholder repeated back (it used to be, word for word).
+			// This is the one thing the phone does better than the overlay — looking a contract up
+			// mid-session without alt-tabbing, and without having accepted it — so say that instead.
+			return (
+				<Text style={[type.body, styles.centeredDim]}>
+					Look up any contract's blueprint pool — including ones you haven't accepted.
+				</Text>
+			);
 		}
 		if (results === null) return null;
 		if (results.length === 0) {

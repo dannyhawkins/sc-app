@@ -303,17 +303,23 @@ out of v1 scope (§11).
 letter-spaced, dim. Each **BlueprintRow**:
 
 ```
-  ○  Pulse Laser Pistol                     Sidearms
-  ○  Pulse Laser Pistol Battery (60 Cap)    Magazines
-  ✓  Testudo Arms Earthshake                Arms          ← owned: dim name, green check
-  ○  Testudo Backpack Earthshake            Backpacks
+  ○  Pulse Laser Pistol                                ›
+     Sidearms
+  ○  Pulse Laser Pistol Battery (60 Cap)               ›
+     Magazines
+  ✓  Testudo Arms Earthshake                           ›   ← owned: dim name, green check
+     Arms
 ```
 
+- The name runs full width on the first line; `sub` is a caption on the second line, not a
+  right-hand column. Checked at real device size: a right column squeezes long names
+  (`Testudo <Part> Earthshake` wraps against `Backpacks`), and the ragged left edge of the
+  captions is cleaner than two columns. Rows are 56pt min with the second line.
 - Leading glyph: `○` unowned (text-faint), `✓` owned (green). `source` is exposed as a dim
   suffix only when it is `manual` or `fab` (`· marked by hand`, `· from fabricator`): the
   overlay lets you tick things yourself, and the phone should say when a tick was a human, not the
   log. `in-game` and `default` show nothing extra.
-- `chance < 1` → mono `62%` between name and sub, gold. `chance === 1` shows nothing — seven rows
+- `chance < 1` → mono `62%` at the end of the first line, gold. `chance === 1` shows nothing — seven rows
   all saying "guaranteed" is noise.
 - Trailing 44pt is reserved and empty (future toggle).
 - Row is `Pressable` iff `hasDetail`; opens the Blueprint sheet. A tiny `›` at the far right when
@@ -597,7 +603,7 @@ the overlay uses; the mono is a choice (the overlay uses whatever the OS has).
 ### Spacing — 4pt base
 
 `4 · 8 · 12 · 16 · 20 · 24 · 32`. Screen gutter **16**. Card padding **16**. Section gap **24**.
-Row min-height **52** (touch-safe even though touching is rare). Status bar height **36**.
+Row min-height **52**, **56** for two-line blueprint rows (touch-safe even though touching is rare). Status bar height **36**.
 
 ### Radii
 
@@ -665,7 +671,10 @@ No component fetches on its own except the two sheets.
 
 ## 10. Screen: Lookup, and the two sheets
 
-**Lookup** — a search field at the top, results under it. `GET /api/mission-search?q=` after 2
+**Lookup** — the `StatusBar` (§3: every screen, no exceptions — a stale connection has to be
+visible from this tab too), a search field under it, results under that. The field's placeholder
+is `Contract name`; the sentence `Search any of 1,999 contracts.` is the empty-state body only, so
+the two never say the same thing twice on one screen. `GET /api/mission-search?q=` after 2
 characters, debounced 250ms. `SearchResultRow`: `title` / `giver` dim / `hasPool` → accent dot on
 the left, `variants > 1` → dim `· 8 variants` suffix. Tap → **PreviewSheet** via
 `/api/mission-preview?title=`. The sheet is `MissionHeader` + `PayoutLine` + `FactsRow` +
@@ -704,10 +713,10 @@ is the flat list; `recipeGroups` is the useful one — render groups, skip the f
 
 ## 12. Open questions for the owner
 
-1. Whether `otherPools` should be as prominent as §5.1 puts it (always visible under the pool).
-   The source says it is the most useful thing the dataset knows; I've taken that literally.
+None open.
 
-Resolved (answers folded into the sections above): `facts.diff` is 1–7 and distinct from the
+Resolved (answers folded into the sections above): `otherPools` stays always-visible under the
+pool (owner, 2026-09-12: "go with your recommendations"); `facts.diff` is 1–7 and distinct from the
 community 1–5 figure (§5.1); `community` is `{payout, facts}`, sidecar-fetched, null by default
 (§3, §6.1); the Connect copy points at Settings → Browser sources & extra monitors (§4).
 
