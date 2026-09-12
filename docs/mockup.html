@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>sc-app — Tracker mockup</title>
+<style>
+  /* Tokens — mirror DESIGN.md §7. Accent is the fixture's ship.accent (#45D0E0, mobiglas / on foot). */
+  :root {
+    --bg: #0A0E13; --surface: #121820; --surface2: #1A222C; --hairline: rgba(255,255,255,.08);
+    --text: #E8EEF3; --dim: #93A3B1; --faint: #5F6F7C;
+    --accent: #45D0E0; --accent-rgb: 69,208,224; --accent-soft: rgba(69,208,224,.14); --on-accent: #07131A;
+    --value: #FFD27A; --estimate: #F5A623; --owned: #2EE6A0; --danger: #FF8478;
+    --sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #16191e; color: var(--text); font-family: var(--sans); padding: 32px 16px 48px; }
+  h1 { font: 600 15px/20px var(--sans); color: #9aa4ad; margin: 0 0 6px; letter-spacing: .02em; }
+  p.lede { font: 400 13px/18px var(--sans); color: #6d7780; margin: 0 0 28px; max-width: 900px; }
+  p.lede code { font: 12px var(--mono); color: #9aa4ad; }
+  .board { display: flex; flex-wrap: wrap; gap: 36px; align-items: flex-start; justify-content: center; }
+  .col { display: flex; flex-direction: column; gap: 12px; }
+  .cap { font: 600 12px/16px var(--sans); color: #6d7780; letter-spacing: .08em; text-transform: uppercase; }
+
+  /* Phone frame — 390pt wide, the iPhone 14/15 non-Pro width. */
+  .phone { width: 390px; height: 844px; background: var(--bg); border-radius: 34px; border: 1px solid #2a2f36;
+    overflow: hidden; position: relative; display: flex; flex-direction: column; }
+  .notch { height: 44px; flex: none; }
+  .screen { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+  .scroll { flex: 1; overflow: hidden; padding: 0 16px 16px; }
+  .tabs { flex: none; height: 74px; border-top: 1px solid var(--hairline); display: flex; padding-bottom: 18px; }
+  .tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    font: 600 11px/14px var(--sans); color: var(--faint); }
+  .tab.on { color: var(--text); }
+  .tab i { width: 22px; height: 22px; border-radius: 6px; border: 2px solid currentColor; display: block; }
+  .tab.on i { background: var(--accent); border-color: var(--accent); }
+
+  /* StatusBar */
+  .status { height: 36px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
+    font: 500 13px/16px var(--mono); color: var(--dim); }
+  .status .left { display: flex; align-items: center; gap: 8px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px rgba(var(--accent-rgb), .7); }
+  .status.stale { color: var(--estimate); } .status.stale .dot { background: var(--estimate); box-shadow: 0 0 8px rgba(245,166,35,.6); }
+  .status.down { color: var(--danger); } .status.down .dot { background: var(--danger); box-shadow: none; }
+  .status.connecting .dot { background: transparent; border: 1.5px solid var(--faint); box-shadow: none; }
+
+  /* MissionHeader */
+  .giver { font: 500 15px/20px var(--sans); color: var(--dim); margin-top: 8px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .chip { font: 600 12px/16px var(--sans); padding: 2px 8px; border-radius: 6px; border: 1px solid var(--hairline); color: var(--dim); }
+  .chip.red { color: var(--danger); border-color: rgba(255,132,120,.4); }
+  .chip.green { color: var(--owned); border-color: rgba(46,230,160,.4); }
+  .title { font: 600 22px/28px var(--sans); color: var(--text); margin: 4px 0 8px; padding-left: 12px; border-left: 3px solid var(--accent); }
+  .payout { font: 500 17px/22px var(--mono); font-variant-numeric: tabular-nums; }
+  .payout .est { color: var(--estimate); }
+  .payout .lbl { font: 500 13px/16px var(--sans); color: var(--estimate); margin-left: 6px; }
+  .facts { font: 500 15px/20px var(--sans); color: var(--dim); margin-top: 6px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .facts b { font-family: var(--mono); font-weight: 500; color: var(--text); font-variant-numeric: tabular-nums; }
+  .facts .sep { color: var(--faint); }
+  .where { font: 500 13px/16px var(--sans); color: var(--dim); margin-top: 6px; }
+
+  /* PoolProgress */
+  .progress { margin: 20px 0 4px; }
+  .big { font: 600 40px/44px var(--mono); font-variant-numeric: tabular-nums; color: var(--value); }
+  .big span { color: var(--dim); font-weight: 500; }
+  .bar { height: 4px; border-radius: 2px; background: var(--surface2); margin-top: 8px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--accent); border-radius: 2px; }
+
+  /* Pool groups + rows */
+  .group { margin-top: 16px; }
+  .glabel { font: 600 13px/16px var(--sans); letter-spacing: 1px; text-transform: uppercase; color: var(--dim); padding: 6px 0; }
+  .row { min-height: 52px; display: flex; align-items: center; gap: 12px; border-top: 1px solid var(--hairline); padding: 8px 0; }
+  .row:last-child { border-bottom: 1px solid var(--hairline); }
+  .glyph { width: 20px; text-align: center; font: 600 16px/20px var(--mono); color: var(--faint); flex: none; }
+  .row.owned .glyph { color: var(--owned); }
+  .name { flex: 1; font: 600 17px/22px var(--sans); color: var(--text); }
+  .row.owned .name { color: var(--dim); font-weight: 500; }
+  .row .src { font: 500 13px/16px var(--sans); color: var(--faint); margin-left: 6px; }
+  .chance { font: 500 15px/20px var(--mono); color: var(--value); font-variant-numeric: tabular-nums; }
+  .sub { font: 500 13px/16px var(--sans); color: var(--dim); }
+  .slot { width: 44px; flex: none; text-align: right; color: var(--faint); font: 400 18px/20px var(--sans); } /* reserved: future toggle */
+
+  .note { margin-top: 16px; padding: 12px 14px; border: 1px solid var(--hairline); border-radius: 10px; background: var(--surface); font: 500 15px/20px var(--sans); color: var(--dim); }
+  .note.amber { border-color: rgba(245,166,35,.45); }
+  .note.amber b { color: var(--estimate); font-weight: 600; display: block; margin-bottom: 4px; }
+  .note.amber q { font-family: var(--mono); font-size: 14px; color: var(--text); }
+
+  /* Unreachable */
+  .dimmed { opacity: .4; }
+  .banner { position: absolute; left: 16px; right: 16px; top: 84px; background: var(--surface); border: 1px solid var(--hairline);
+    border-radius: 14px; padding: 20px; }
+  .banner h2 { font: 600 22px/28px var(--sans); margin: 0 0 4px; }
+  .banner .seen { font: 500 15px/20px var(--mono); color: var(--dim); font-variant-numeric: tabular-nums; margin-bottom: 14px; }
+  .banner p { font: 500 15px/21px var(--sans); color: var(--dim); margin: 0 0 18px; }
+  .btns { display: flex; gap: 10px; }
+  .btn { flex: 1; text-align: center; padding: 12px 0; border-radius: 10px; font: 600 15px/20px var(--sans); border: 1px solid var(--hairline); color: var(--text); }
+  .btn.primary { background: var(--accent-soft); border-color: rgba(var(--accent-rgb), .5); }
+
+  /* Fragments column */
+  .frag { width: 390px; background: var(--bg); border: 1px solid #2a2f36; border-radius: 14px; padding: 12px 16px 16px; }
+  .frag .cap { margin-bottom: 8px; }
+  .flash { background: var(--accent); color: var(--on-accent); border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+  .flash .k { font: 600 13px/16px var(--sans); letter-spacing: 1px; text-transform: uppercase; opacity: .8; }
+  .flash .n { font: 600 22px/28px var(--sans); }
+  .flash .img { width: 64px; height: 64px; border-radius: 10px; background: rgba(7,19,26,.25); flex: none; margin-left: auto; }
+  .empty { text-align: center; padding: 40px 16px; }
+  .empty h3 { font: 600 22px/28px var(--sans); margin: 0 0 6px; }
+  .empty p { font: 500 15px/21px var(--sans); color: var(--dim); margin: 0 0 16px; }
+  .empty small { font: 500 13px/16px var(--mono); color: var(--faint); }
+  .earn { font: 500 15px/20px var(--sans); color: var(--dim); }
+  .earn b { font: 500 15px/20px var(--mono); color: var(--value); font-variant-numeric: tabular-nums; }
+  .earn .dash { color: var(--dim); font-family: var(--mono); }
+  .standing { display: flex; align-items: baseline; gap: 10px; font: 500 15px/20px var(--sans); padding: 8px 0; border-top: 1px solid var(--hairline); }
+  .standing .f { flex: 1; color: var(--text); font-weight: 600; }
+  .standing .r { color: var(--dim); }
+  .standing .c { font-family: var(--mono); color: var(--value); font-variant-numeric: tabular-nums; }
+  .standing .c i { font-style: normal; color: var(--estimate); }
+</style>
+</head>
+<body>
+
+<h1>sc-app · Tracker at 390pt</h1>
+<p class="lede">Left: the tracked mission, every value verbatim from <code>fixtures/mission-preview.json</code> (a real 7-blueprint pool, 0 owned — that is what the fixture says, so that is what it shows). Middle: the same screen when the PC has gone away. Right: the fragments the two screens don't demonstrate — owned rows, the unlock flash, the empty idle state, and the null-money rule. Accent is the fixture's <code>ship.accent</code> (mobiglas / on foot).</p>
+
+<div class="board">
+
+  <!-- ─────────────── Screen 1: Tracker, tracked, live ─────────────── -->
+  <div class="col">
+    <div class="cap">Tracker · tracked · live</div>
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="screen">
+        <div class="status">
+          <div class="left"><span class="dot"></span>192.168.1.20 · live</div>
+          <div>4.10.0 · LIVE</div>
+        </div>
+        <div class="scroll">
+          <div class="giver">InterSec Defense Solutions · Collection</div>
+          <div class="title">Recover Vanduul Tech</div>
+          <div class="payout"><span class="est">~681,750</span> <span style="color:var(--dim)">aUEC</span><span class="lbl">estimated</span></div>
+          <div class="facts"><b>1h 36m</b> run <span class="sep">·</span> <b>5.8</b> / 7 <span class="sep">·</span> no retry</div>
+          <div class="where">Offered at Nyx I, Nyx II, Nyx III</div>
+
+          <div class="progress">
+            <div class="big">0 <span>/ 7</span></div>
+            <div class="bar"><i style="width:0%"></i></div>
+          </div>
+
+          <div class="group">
+            <div class="glabel">Weapons</div>
+            <div class="row"><span class="glyph">○</span><span class="name">Pulse Laser Pistol</span><span class="sub">Sidearms</span><span class="slot">›</span></div>
+          </div>
+          <div class="group">
+            <div class="glabel">Ammo</div>
+            <div class="row"><span class="glyph">○</span><span class="name">Pulse Laser Pistol Battery (60 Cap)</span><span class="sub">Magazines</span><span class="slot">›</span></div>
+          </div>
+          <div class="group">
+            <div class="glabel">Armor</div>
+            <div class="row"><span class="glyph">○</span><span class="name">Testudo Arms Earthshake</span><span class="sub">Arms</span><span class="slot">›</span></div>
+            <div class="row"><span class="glyph">○</span><span class="name">Testudo Backpack Earthshake</span><span class="sub">Backpacks</span><span class="slot">›</span></div>
+            <div class="row"><span class="glyph">○</span><span class="name">Testudo Core Earthshake</span><span class="sub">Core</span><span class="slot">›</span></div>
+            <div class="row"><span class="glyph">○</span><span class="name">Testudo Helmet Earthshake</span><span class="sub">Helmets</span><span class="slot">›</span></div>
+            <div class="row"><span class="glyph">○</span><span class="name">Testudo Legs Earthshake</span><span class="sub">Legs</span><span class="slot">›</span></div>
+          </div>
+        </div>
+        <div class="tabs">
+          <div class="tab on"><i></i>Tracker</div>
+          <div class="tab"><i></i>Lookup</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────── Screen 2: Tracker, unreachable ─────────────── -->
+  <div class="col">
+    <div class="cap">Tracker · unreachable · last frame beneath</div>
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="screen">
+        <div class="status down">
+          <div class="left"><span class="dot"></span>can't reach 192.168.1.20</div>
+          <div></div>
+        </div>
+        <div class="scroll dimmed">
+          <div class="giver">InterSec Defense Solutions · Collection</div>
+          <div class="title">Recover Vanduul Tech</div>
+          <div class="payout"><span class="est">~681,750</span> <span style="color:var(--dim)">aUEC</span><span class="lbl">estimated</span></div>
+          <div class="facts"><b>1h 36m</b> run <span class="sep">·</span> <b>5.8</b> / 7 <span class="sep">·</span> no retry</div>
+          <div class="where">Offered at Nyx I, Nyx II, Nyx III</div>
+          <div class="progress">
+            <div class="big">0 <span>/ 7</span></div>
+            <div class="bar"><i style="width:0%"></i></div>
+          </div>
+          <div class="group">
+            <div class="glabel">Weapons</div>
+            <div class="row"><span class="glyph">○</span><span class="name">Pulse Laser Pistol</span><span class="sub">Sidearms</span><span class="slot">›</span></div>
+          </div>
+          <div class="group">
+            <div class="glabel">Ammo</div>
+            <div class="row"><span class="glyph">○</span><span class="name">Pulse Laser Pistol Battery (60 Cap)</span><span class="sub">Magazines</span><span class="slot">›</span></div>
+          </div>
+          <div class="group">
+            <div class="glabel">Armor</div>
+            <div class="row"><span class="glyph">○</span><span class="name">Testudo Arms Earthshake</span><span class="sub">Arms</span><span class="slot">›</span></div>
+            <div class="row"><span class="glyph">○</span><span class="name">Testudo Backpack Earthshake</span><span class="sub">Backpacks</span><span class="slot">›</span></div>
+            <div class="row"><span class="glyph">○</span><span class="name">Testudo Core Earthshake</span><span class="sub">Core</span><span class="slot">›</span></div>
+            <div class="row"><span class="glyph">○</span><span class="name">Testudo Helmet Earthshake</span><span class="sub">Helmets</span><span class="slot">›</span></div>
+            <div class="row"><span class="glyph">○</span><span class="name">Testudo Legs Earthshake</span><span class="sub">Legs</span><span class="slot">›</span></div>
+          </div>
+        </div>
+        <div class="banner">
+          <h2>Can't reach your PC</h2>
+          <div class="seen">Last seen 14:32 · 6 min ago</div>
+          <p>Usually the PC went to sleep, the game closed, or the wifi dropped. Retrying every 30s.</p>
+          <div class="btns"><div class="btn primary">Retry now</div><div class="btn">Change address</div></div>
+        </div>
+        <div class="tabs">
+          <div class="tab on"><i></i>Tracker</div>
+          <div class="tab"><i></i>Lookup</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────── Fragments ─────────────── -->
+  <div class="col">
+    <div class="cap">Fragments</div>
+
+    <div class="frag">
+      <div class="cap">Status bar · stale / connecting</div>
+      <div class="status stale" style="padding:0"><div class="left"><span class="dot"></span>reconnecting · last seen 12s ago</div><div></div></div>
+      <div class="status connecting" style="padding:0"><div class="left"><span class="dot"></span>192.168.1.20 · connecting</div><div></div></div>
+    </div>
+
+    <div class="frag">
+      <div class="cap">BlueprintRow · owned, hand-marked, real odds</div>
+      <div class="row owned"><span class="glyph">✓</span><span class="name">Testudo Helmet Earthshake</span><span class="sub">Helmets</span><span class="slot">›</span></div>
+      <div class="row owned"><span class="glyph">✓</span><span class="name">Testudo Core Earthshake<span class="src">· marked by hand</span></span><span class="sub">Core</span><span class="slot">›</span></div>
+      <div class="row"><span class="glyph">○</span><span class="name">Pulse Laser Pistol</span><span class="chance">62%</span><span class="sub">Sidearms</span><span class="slot">›</span></div>
+      <div style="font:500 12px/16px var(--sans);color:var(--faint);margin-top:8px">Row order never changes. Trailing 44pt is empty on purpose — the owned toggle lands there when pairing ships. <code style="font:11px var(--mono)">chance: 1</code> shows nothing; the 62% is illustrative, the fixture pool is all guaranteed.</div>
+    </div>
+
+    <div class="frag">
+      <div class="cap">CommunityFacts · 1–5, players' number, never CIG's</div>
+      <div class="facts" style="margin-top:0"><span style="letter-spacing:2px;color:var(--accent)">▰▰▰<span style="color:var(--surface2)">▰▰</span></span> <b>3.4</b> players say <span class="sep">·</span> 12 reports</div>
+      <div style="font:500 12px/16px var(--sans);color:var(--faint);margin-top:8px">Illustrative — <code style="font:11px var(--mono)">community</code> is null in every fixture, so the tracked screen (left) correctly shows nothing. <code style="font:11px var(--mono)">facts.diff</code> (5.8 / 7, CIG's scale) stays plain text and never gets a meter.</div>
+    </div>
+
+    <div class="frag">
+      <div class="cap">ReceivedFlash · 6s, accent, haptic</div>
+      <div class="flash"><div><div class="k">Blueprint received</div><div class="n">Testudo Helmet Earthshake</div></div><div class="img"></div></div>
+    </div>
+
+    <div class="frag">
+      <div class="cap">UnrecognizedNotice · never dismissable</div>
+      <div class="note amber" style="margin-top:0"><b>The game wrote a name I don't know</b><q>…raw string from the log…</q><div style="margin-top:6px">Fix this in SC Overlay → Settings → Language.</div></div>
+    </div>
+
+    <div class="frag">
+      <div class="cap">EarningsStrip · missions-empty.json, verbatim</div>
+      <div class="earn">0 contracts · <b>0</b> rep · <span class="dash">—</span> aUEC</div>
+      <div style="font:500 12px/16px var(--sans);color:var(--faint);margin-top:6px"><code style="font:11px var(--mono)">aUECTotal: null</code> renders as a dash. Never 0. The phone never adds money.</div>
+    </div>
+
+    <div class="frag">
+      <div class="cap">StandingRow · contracts, not rep</div>
+      <div class="standing"><span class="f">InterSec Defense Solutions</span><span class="r">Contractor</span><span class="c"><i>~</i>27 contracts</span></div>
+      <div style="font:500 12px/16px var(--sans);color:var(--faint);margin-top:6px">Shape only — <code style="font:11px var(--mono">standings[]</code> is empty in every fixture. Rank names and the count come from <code style="font:11px var(--mono">standing</code> / <code style="font:11px var(--mono">contractsToGo</code>.</div>
+    </div>
+
+    <div class="frag">
+      <div class="cap">EmptyIdle · first run, no log</div>
+      <div class="empty">
+        <h3>Nothing tracked.</h3>
+        <p>Accept a contract with a blueprint pool and it'll show up here.</p>
+        <p style="color:var(--faint)">No game log seen yet — is Star Citizen running?</p>
+        <small>SC Overlay 0.1.47 · dataset 4.10.0</small>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

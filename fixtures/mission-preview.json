@@ -1,0 +1,101 @@
+{
+	"contractKey": "IDS_ResourceGathering_Tech",
+	"title": "Recover Vanduul Tech",
+	"giver": "InterSec Defense Solutions",
+	"missionType": "Collection",
+	"illegal": false,
+	"rankRequired": null,
+	"rankRequiredName": null,
+	"payout": { "min": 681750, "max": 681750, "currency": "UEC" },
+	"payoutEstimated": true,
+	"reputationGained": [],
+	"reputationLost": [],
+	"whereToGet": ["Nyx I", "Nyx II", "Nyx III"],
+	"otherPools": [],
+	"inferredRank": null,
+	"repBar": null,
+	"ambiguous": false,
+	"hasPool": true,
+	"facts": { "dur": 96, "diff": 5.8, "noRetry": true },
+	"variants": 1,
+	"pools": [
+		{
+			"poolUuid": "36e8ac4d-8962-4b03-89e7-cd7a06fc4adc",
+			"blueprints": [
+				{
+					"name": "Pulse Laser Pistol",
+					"owned": false,
+					"source": null,
+					"chance": 1,
+					"tab": "weapons",
+					"sub": "Sidearms",
+					"item": "02e848a0-d729-4826-a780-8506a2ae4a89",
+					"hasDetail": true
+				},
+				{
+					"name": "Pulse Laser Pistol Battery (60 Cap)",
+					"owned": false,
+					"source": null,
+					"chance": 1,
+					"tab": "ammo",
+					"sub": "Magazines",
+					"item": "b76f9795-28fe-40a3-9a60-ffdbc4e8c713",
+					"hasDetail": true
+				},
+				{
+					"name": "Testudo Arms Earthshake",
+					"owned": false,
+					"source": null,
+					"chance": 1,
+					"tab": "armor",
+					"sub": "Arms",
+					"item": "f7753764-2420-446d-9b79-2eda37667d7a",
+					"hasDetail": true
+				},
+				{
+					"name": "Testudo Backpack Earthshake",
+					"owned": false,
+					"source": null,
+					"chance": 1,
+					"tab": "armor",
+					"sub": "Backpacks",
+					"item": "17d9c6b5-8a2c-4900-9639-2026707570b6",
+					"hasDetail": true
+				},
+				{
+					"name": "Testudo Core Earthshake",
+					"owned": false,
+					"source": null,
+					"chance": 1,
+					"tab": "armor",
+					"sub": "Core",
+					"item": "a7d15d5d-ccbc-4f22-bc73-aa449a9827cf",
+					"hasDetail": true
+				},
+				{
+					"name": "Testudo Helmet Earthshake",
+					"owned": false,
+					"source": null,
+					"chance": 1,
+					"tab": "armor",
+					"sub": "Helmets",
+					"item": "6514f103-dc40-4f90-ba79-f1a041c7dfac",
+					"hasDetail": true
+				},
+				{
+					"name": "Testudo Legs Earthshake",
+					"owned": false,
+					"source": null,
+					"chance": 1,
+					"tab": "armor",
+					"sub": "Legs",
+					"item": "7bc5259c-6462-4c30-84ab-2ac895895ba3",
+					"hasDetail": true
+				}
+			]
+		}
+	],
+	"owned": 0,
+	"total": 7,
+	"community": null
+}

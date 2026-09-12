@@ -1,0 +1,89 @@
+{
+	"name": "Pulse Laser Pistol",
+	"manufacturer": "<= PLACEHOLDER =>",
+	"craftTimeSeconds": 120,
+	"stats": [
+		{ "label": "Impact Force", "value": "11.8", "unit": null, "key": "weapon_damage" },
+		{ "label": "Fire Rate", "value": "500", "unit": "rpm", "key": "weapon_firerate" },
+		{ "label": "Mass", "value": "1.15", "unit": "kg", "key": null }
+	],
+	"ingredients": [
+		{ "name": "Gold", "scu": 0.01, "qty": null },
+		{ "name": "Janalite", "scu": null, "qty": 1 },
+		{ "name": "Lindinium", "scu": 0.02, "qty": null }
+	],
+	"recipeGroups": [
+		{
+			"name": "Frame",
+			"requiredCount": 1,
+			"chooseOne": false,
+			"materials": [
+				{ "name": "Lindinium", "scu": 0.02, "qty": null, "minQuality": 0, "sell": 51000 }
+			],
+			"modifiers": [
+				{
+					"key": "weapon_recoil_handling",
+					"name": "Recoil Handling",
+					"atMinQuality": 1.4,
+					"atMaxQuality": 0.6,
+					"qualityMin": 0,
+					"qualityMax": 1000,
+					"curve": "linear"
+				},
+				{
+					"key": "weapon_recoil_kick",
+					"name": "Recoil Kick",
+					"atMinQuality": 1.4,
+					"atMaxQuality": 0.6,
+					"qualityMin": 0,
+					"qualityMax": 1000,
+					"curve": "linear"
+				},
+				{
+					"key": "weapon_recoil_smoothness",
+					"name": "Recoil Smoothness",
+					"atMinQuality": 1.4,
+					"atMaxQuality": 0.6,
+					"qualityMin": 0,
+					"qualityMax": 1000,
+					"curve": "linear"
+				}
+			]
+		},
+		{
+			"name": "Cabling",
+			"requiredCount": 1,
+			"chooseOne": false,
+			"materials": [{ "name": "Gold", "scu": 0.01, "qty": null, "minQuality": 0, "sell": 31000 }],
+			"modifiers": [
+				{
+					"key": "weapon_damage",
+					"name": "Impact Force",
+					"atMinQuality": 0.9,
+					"atMaxQuality": 1.06,
+					"qualityMin": 0,
+					"qualityMax": 1000,
+					"curve": "linear"
+				}
+			]
+		},
+		{
+			"name": "Power Regulator",
+			"requiredCount": 1,
+			"chooseOne": false,
+			"materials": [{ "name": "Janalite", "scu": null, "qty": 1, "minQuality": 0, "sell": null }],
+			"modifiers": [
+				{
+					"key": "weapon_damage",
+					"name": "Impact Force",
+					"atMinQuality": 0.9,
+					"atMaxQuality": 1.1,
+					"qualityMin": 0,
+					"qualityMax": 1000,
+					"curve": "linear"
+				}
+			]
+		}
+	],
+	"dismantle": [{ "name": "Gold", "scu": 0.005 }]
+}

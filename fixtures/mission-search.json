@@ -1,0 +1,60 @@
+{
+	"missions": [
+		{
+			"title": "Recover Cargo",
+			"key": "CFP_Pyro_RegionA_Rank0_VE_1AsteroidBase_Criminals_RetrieveCargo",
+			"variants": 8,
+			"giver": "Citizens for Prosperity",
+			"hasPool": false
+		},
+		{
+			"title": "Recover Vanduul Corpses",
+			"key": "IDS_ResourceGathering_CryoP",
+			"variants": 1,
+			"giver": "InterSec Defense Solutions",
+			"hasPool": true
+		},
+		{
+			"title": "Recover Vanduul Tech",
+			"key": "IDS_ResourceGathering_Tech",
+			"variants": 1,
+			"giver": "InterSec Defense Solutions",
+			"hasPool": true
+		},
+		{
+			"title": "Recover VIP Covalex Shipment",
+			"key": "Covalex_Nyx_Super_RecoverCargo",
+			"variants": 3,
+			"giver": "Covalex Independent Contractors",
+			"hasPool": false
+		},
+		{
+			"title": "Recovering Valuable Supplies",
+			"key": "CFP_Pyro_Medium_RecoverCargo",
+			"variants": 1,
+			"giver": "Citizens for Prosperity",
+			"hasPool": true
+		},
+		{
+			"title": "Bulk Covalex Shipment Needs Recovering",
+			"key": "Covalex_Nyx_VeryHard_RecoverCargo",
+			"variants": 3,
+			"giver": "Covalex Independent Contractors",
+			"hasPool": false
+		},
+		{
+			"title": "Cargo Recovery",
+			"key": "PU_Derelict_Recovery_Collect_Lawful_Delamar_Battaglia",
+			"variants": 1,
+			"giver": "Recco Battaglia",
+			"hasPool": false
+		},
+		{
+			"title": "Client's Cargo Needs Recovering",
+			"key": "EchhartSecurity_Nyx_Easy_RecoverCargo",
+			"variants": 3,
+			"giver": "Eckhart Security",
+			"hasPool": false
+		}
+	]
+}
