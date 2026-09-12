@@ -76,9 +76,17 @@ against. There's also a fixture-backed mock mode for working with no server at a
 task            # list what's available
 ```
 
+## Licence
+
+Source-available under [FSL-1.1-MIT](LICENSE.md), matching SC Overlay — read it, modify it, run
+your own build, publish a free fork or port. What you can't do is sell it or ship it inside
+something that substitutes for SC Overlay. Each version converts to MIT two years after release.
+
+The names and logos aren't licensed, so a fork needs its own branding.
+
 ## Relationship to SC Overlay
 
-SC Overlay is by SubliminalsTV and is source-available under FSL-1.1-MIT. This is a separate
+SC Overlay is by SubliminalsTV and is source-available under the same licence. This is a separate
 client for its local API by the same author. Star Citizen®, Roberts Space Industries® and Cloud
 Imperium® are registered trademarks of Cloud Imperium Rights LLC; this is an unofficial fan
 project and is not affiliated with or endorsed by CIG.
